@@ -1,4 +1,4 @@
 SensorCloud
 ===========
 
-SensorCloud documentain and SDK's
+SensorCloud API documentation and SDK's
