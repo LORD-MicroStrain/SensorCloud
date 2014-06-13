@@ -3,6 +3,8 @@ Sensor Methods
 
 * [Get Channels](#get-channels)
 * [Add Channel](#add-channel)
+* [Update Channel](#update-channel)
+* [Delete Channel](#delete-channel)
 
 Get Channels
 ------------
