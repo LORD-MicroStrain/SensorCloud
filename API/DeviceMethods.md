@@ -138,6 +138,46 @@ string	sensorLabel;       /* utf-8 string, label for sensor, 0-50 bytes */
 string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes */
 ```
 
+##Response
+* **Success**: 201 Sensor Updated
+* **Errors:
+   * 404 Not Found - A sensor name was used that doesn't exist
+
+===============
+Get Sensor Info
+---------------
+Get sensor description, label, and type.
+
+###Request
+Method | GET
+-------|----
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
+Header | Accept: application/xdr | text/xml
+
+###Response
+* ***Success***: 200 OK
+* ***Errors***:
+   * 404 Not Found - A sensor name was used that doesn't exist
+* ***Content***:
+   * XDR:         
+                  
+      ```c
+      int           version=1;           /* always 1, may change with future versions */
+      string        type;
+      string        label;
+      string        description;
+      ```
+   * XML
+    
+      ```xml
+      <sensor version='1'>
+         <type></type>
+         <label></label>
+         <description></description>
+      </attribute>
+      ```
+
+
 
 
 
