@@ -1,7 +1,10 @@
 Device Methods
 ==============
 
-[Authenticate](#authenticate)
+* [Authenticate](#authenticate)
+* [Get Sensors](#get-sensors)
+* [Add Sensor](#add-sensor)
+* [Update Sensor](#update-sensor)
 
 Authenticate
 ------------
