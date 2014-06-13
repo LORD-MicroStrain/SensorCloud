@@ -1,7 +1,7 @@
 Device Methods
 ==============
 
-[Authenticate][]
+[Authenticate](#Authenticate)
 
 Authenticate
 ------------
