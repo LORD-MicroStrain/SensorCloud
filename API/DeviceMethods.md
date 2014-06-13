@@ -101,7 +101,7 @@ Add Sensor
 -------------
 Add a new sensor to a device.  A sensor groups related channels of data.  To create a sensor a unique name must be applied (unique relative to the device).  The name will be used to access the sensor after it is created.  A sensor’s name is immutable; once it is created it cannot be changed.  The sensor label is mutable, and can be updated at any time.  Generally the label is used at the presentation layer to indentify the sensor to the user, so the presentation of the sensor can be modified using the label.  The sensor name must be between 1 and 50 characters in the set [a-z,A-Z,0-9,-,_].
 
-###Request
+### Request
 Method | PUT
 -------|----
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
@@ -114,7 +114,7 @@ string	sensorLabel;       /* utf-8 string, label for sensor, 0-50 bytes */
 string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes */
 ```
 
-###Response
+### Response
 * **Success**: 201 Created
 * **Errors**:
    * 400 Invalid sensor name - Sensor name must be between 1 and 50 characters and only contain the following [a-z A-Z 0-9 _ -]
@@ -125,7 +125,7 @@ Update Sensor
 -------------
 Update an existing sensor.  This is similar to Add Sensor, except that the sensor referenced by ```<sensor_name>``` must already exist, and the http method POST is used instead of PUT.
 
-###Request
+### Request
 Method | POST
 -------|-----
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
@@ -138,7 +138,7 @@ string	sensorLabel;       /* utf-8 string, label for sensor, 0-50 bytes */
 string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes */
 ```
 
-##Response
+### Response
 * **Success**: 201 Sensor Updated
 * **Errors:
    * 404 Not Found - A sensor name was used that doesn't exist
@@ -148,13 +148,13 @@ Get Sensor Info
 ---------------
 Get sensor description, label, and type.
 
-###Request
+### Request
 Method | GET
 -------|----
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
 Header | Accept: application/xdr, text/xml
 
-###Response
+### Response
 * ***Success***: 200 OK
 * ***Errors***:
    * 404 Not Found - A sensor name was used that doesn't exist
@@ -182,12 +182,12 @@ Delete Sensor
 -------------
 Delete a sensor and all information associated with the sensor.  All channels and all the data-streams and the underlying data must be deleted before this will succeed (refer to Delete Channel).  Use delete very carefully.  Once a sensor is deleted the action is immediate and permanent.  There is no way to recover a sensor or any of its data after it is deleted.
 
-###Request
+### Request
 Method | DELETE
 -------|-------
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
 
-##Response
+### Response
 * ***Success***: 204 Deleted
 * ***Errors***:
    * 404 Not Found - A sensor name was used that doesn't exist
