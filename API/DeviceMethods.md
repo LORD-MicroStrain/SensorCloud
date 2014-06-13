@@ -25,7 +25,34 @@ It is also possible to us e a SensorCloud account’s username and password to a
  * 401 Invalid Credentials: Username or password is not correct
 * **Content**: XDR
 ```
- string auth_token
- string server
- string reserved
+   string auth_token
+   string server
+   string reserved
 ```
+
+Get Sensors
+-----------
+GetSensors returns a list of all the sensors for the device with basic channel information for each sensor.
+Note: Host and auth_token are returned from the call to authenticate.
+
+###Request
+* **Host**: \*.sensorcloud.microstrain.com
+* **Url**: ```/SensorCloud/devices/<device_id>/sensors/?version=1&auth_token=<auth_token>```
+* **Method**: GET
+* **Header**:
+  * ```Accept: <application/xdr>```
+
+###Response
+* **Success**: 200 OK
+* **Content**: XDR
+```
+```
+
+
+
+
+
+
+
+
+
