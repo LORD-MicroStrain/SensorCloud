@@ -20,6 +20,7 @@ Headers| <ul><li>Accept: application/xdr, txt/xml</li><li>Accept-Encoding: compr
 * ***Success***: 200 OK
 * ***Content***:
   * XDR
+        
         ```C
         struct
         {
@@ -55,7 +56,8 @@ Headers| <ul><li>Accept: application/xdr, txt/xml</li><li>Accept-Encoding: compr
         channelInfo channels<>;     /* array of channels */
         ````
   * XML
-        ```
+        
+        ```XML
         <channels version='1'>
           <channel>
             <name></name>
