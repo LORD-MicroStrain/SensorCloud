@@ -90,6 +90,48 @@ int x;
   SensorInfo sensors<>;       /* array of sensors */
 ```
 
+=============
+Add Sensor
+-------------
+Add a new sensor to a device.  A sensor groups related channels of data.  To create a sensor a unique name must be applied (unique relative to the device).  The name will be used to access the sensor after it is created.  A sensor’s name is immutable; once it is created it cannot be changed.  The sensor label is mutable, and can be updated at any time.  Generally the label is used at the presentation layer to indentify the sensor to the user, so the presentation of the sensor can be modified using the label.  The sensor name must be between 1 and 50 characters in the set [a-z,A-Z,0-9,-,_].
+
+###Request
+Method | Put
+-------|----
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
+Header | Content-Type: application/xdr
+Content: XDR
+```
+int	   version=1;		    /* int, always 1, may change with future versions */
+string	sensorType;        /* utf-8 string, sensor type name, 0-50 bytes */
+string	sensorLabel;       /* utf-8 string, label for sensor, 0-50 bytes */
+string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes */
+```
+
+###Response
+* **Success**: 201 Created
+* **Errors**:
+   * 400 Invalid sensor name - Sensor name must be between 1 and 50 characters and only contain the following [a-z A-Z 0-9 _ -]
+   * 400 Sensor exists - A Sensor with the same name already exists
+
+=============
+Update Sensor
+-------------
+Update an existing sensor.  This is similar to Add Sensor, except that the sensor referenced by ```<sensor_name>``` must already exist, and the http method POST is used instead of PUT.
+
+###Request
+Method | POST
+-------|-----
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
+Header | Content-Type: application/xdr
+Content: XDR
+```
+int	   version=1;		    /* int, always 1, may change with future versions */
+string	sensorType;        /* utf-8 string, sensor type name, 0-50 bytes */
+string	sensorLabel;       /* utf-8 string, label for sensor, 0-50 bytes */
+string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes */
+```
+
 
 
 
