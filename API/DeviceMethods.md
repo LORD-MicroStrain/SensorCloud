@@ -25,7 +25,7 @@ It is also possible to us e a SensorCloud account’s username and password to a
  * 401 Invalid Credentials: Username or password is not correct
 * **Content**: XDR
 ```
-string auth_token
-string server
-string reserved
+ string auth_token
+ string server
+ string reserved
 ```
