@@ -18,3 +18,14 @@ It is also possible to us e a SensorCloud account’s username and password to a
 * **Method**: GET
 * **Header**:
   * ```Accept: <application/xdr>```
+
+###Response
+* **Success**: 200 OK
+* **Errors**:
+ * 401 Invalid Credentials: Username or password is not correct
+* **Content**: XDR
+```
+string auth_token
+string server
+string reserved
+```
