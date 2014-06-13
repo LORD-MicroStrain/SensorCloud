@@ -35,7 +35,7 @@ It is also possible to us e a SensorCloud account’s username and password to a
    string server
    string reserved
 ```
- 
+
 ===========
 Get Sensors
 -----------
@@ -102,7 +102,7 @@ Add Sensor
 Add a new sensor to a device.  A sensor groups related channels of data.  To create a sensor a unique name must be applied (unique relative to the device).  The name will be used to access the sensor after it is created.  A sensor’s name is immutable; once it is created it cannot be changed.  The sensor label is mutable, and can be updated at any time.  Generally the label is used at the presentation layer to indentify the sensor to the user, so the presentation of the sensor can be modified using the label.  The sensor name must be between 1 and 50 characters in the set [a-z,A-Z,0-9,-,_].
 
 ###Request
-Method | Put
+Method | PUT
 -------|----
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
 Header | Content-Type: application/xdr
@@ -152,7 +152,7 @@ Get sensor description, label, and type.
 Method | GET
 -------|----
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
-Header | Accept: application/xdr | text/xml
+Header | Accept: application/xdr, text/xml
 
 ###Response
 * ***Success***: 200 OK
@@ -177,6 +177,21 @@ Header | Accept: application/xdr | text/xml
       </attribute>
       ```
 
+=============
+Delete Sensor
+-------------
+Delete a sensor and all information associated with the sensor.  All channels and all the data-streams and the underlying data must be deleted before this will succeed (refer to Delete Channel).  Use delete very carefully.  Once a sensor is deleted the action is immediate and permanent.  There is no way to recover a sensor or any of its data after it is deleted.
+
+###Request
+Method | DELETE
+-------|-------
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/?version=1&auth_token=<auth_token>```
+
+##Response
+* ***Success***: 204 Deleted
+* ***Errors***:
+   * 404 Not Found - A sensor name was used that doesn't exist
+   * 400 Bad Request – Cannot delete sensor, sensor currently has existing channels
 
 
 
