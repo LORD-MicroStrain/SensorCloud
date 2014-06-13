@@ -1,9 +1,10 @@
 Device Methods
 ==============
 
-[Authenticate](#Authenticate)
+[Authenticate](#authenticate)
 
-## Authenticate
+Authenticate
+------------
 
 All access to a device is protected and can only be accessed by an authenticated request. To authenticate the user passes in the device’s auth key. If the auth key is valid for the device then an auth\_token (authentication token) will be returned that must used for all subsequent request for this device. Along with the auth\_token, the DNS server name for all other request is also returned.
 
