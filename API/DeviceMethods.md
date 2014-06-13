@@ -29,7 +29,8 @@ It is also possible to us e a SensorCloud account’s username and password to a
    string server
    string reserved
 ```
-
+ 
+===========
 Get Sensors
 -----------
 GetSensors returns a list of all the sensors for the device with basic channel information for each sensor.
