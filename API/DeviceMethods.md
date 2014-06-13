@@ -24,7 +24,7 @@ It is also possible to us e a SensorCloud account’s username and password to a
 * **Errors**:
  * 401 Invalid Credentials: Username or password is not correct
 * **Content**: XDR
-```
+```C
    string auth_token
    string server
    string reserved
@@ -46,7 +46,8 @@ Method    | GET
 ###Response
 * **Success**: 200 OK
 * **Content**: XDR
-```
+```c
+int x;
   struct	
   {
       string        	  storedUnit;
