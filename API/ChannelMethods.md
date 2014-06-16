@@ -4,6 +4,8 @@ Channel Methods
 * [Add Channel Attribute](#add-channel-attribute)
 * [Bulk Add Channel Attribute](#bulk-add-channel-attribute)
 * [Get Channel Attributes](#get-channel-attributes)
+* [Get Channel Attribute](#get-channel-attribute)
+* [Delete Channel Attribute](#delete-channel-attribute)
 
 Add Channel Attribute
 ---------------------
