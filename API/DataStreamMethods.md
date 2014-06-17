@@ -1,6 +1,15 @@
 Data Stream Methods
 ===================
 
+* [Get Data-Stream Info](#get-data-stream-info)
+* [Get Sample Rate Info](#get-sample-rate-info)
+* [Add Time-Series Data](#add-time-series-data)
+* [Download Time-Series Data](#download-time-series-data)
+* [Download Latest Time-Series Data Point](#download-latest-time-series-data-point)
+* [Get Unit Info](#get-unit-info)
+* [Add/Update Unit](#add/update-unit)
+* [Delete Unit](#delete-unit)
+
 Get Data-Stream Info
 --------------------
 Get detailed info about a specific data-stream.  (Currently, time-series is the only stream type)
@@ -71,7 +80,7 @@ Headers| Accept: application/xdr, text/xml
 * ***Content***:
   * XDR
 
-        ```
+        ```C
         enum{HERTZ=0, SECONDS=1} sampleRateType;
         
         struct 
@@ -93,7 +102,7 @@ Headers| Accept: application/xdr, text/xml
 
   * XML
 
-        ```
+        ```XML
         <partitions version=1>
           <partition>
             <startTime/>
@@ -117,7 +126,7 @@ Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<cha
 Headers| Content-Type: application/xdr
 
 Content: XDR
-```
+```C
 int MAX_DATAPOINTS = 100000;
 
 enum{HERTZ=1, SECONDS=0} sampleRateType;
@@ -238,7 +247,7 @@ Headers| Accept: application/xdr
   * 404 Not Found - Channel does not have a time-series stream
 * ***Content***: XDR
 
-```
+```C
 struct
 {
     unsigned hyper  	timestamp;
