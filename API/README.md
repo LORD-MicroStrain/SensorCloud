@@ -9,15 +9,21 @@ API
 Overview
 --------
 SensorCloud is a massively scalable data-store for sensor data.
+
 SensorCloud provides a REST API to allow any device to upload data to SensorCloud.  The API is implemented as a web service using standard http request commands.  Using the web service model keeps the API Interface open and easily adapted to any platform.
-HTTPS
+
+### HTTPS ###
 All communication with SensorCloud is performed over https.  This ensures that all communication between SensorCloud and a device is over an encrypted communication channel.
-Time Stamps
+
+### Time Stamps ###
 All timestamps used throughout the API are UNIX timestamps in nanosecond.  The timestamp values have nanosecond resolution but the accuracy of the timestamp is device dependent.  All timestamps are relative to UTC.
-Data Format
+
+### Data Format ###
 All API requests use the XDR format for both request and response data.  We are also in the process of adding support for xml and json data formats for some of the requests.
-Why XDR?
+
+### Why XDR? ###
 One of the primary goals of SensorCloud was to enable low powered devices to uploading large amounts of data.  The most efficient means to accomplish this is to use a binary data format.  XDR allows for a standardized mechanism for transmitting well-structured data in a machine independent manor, while minimizing the cost in time and space of encoding the data.
+
 XML, CSV, JSON are all capable of communicating the same data as XDR, however they are all text based formats and therefore add computational overhead and require from 3 to 20 times as many bytes to transmit the same data.  Also because these formats are text based, this means that values must be converted from their native type to a text representation of the type.  For some data types there are potential ambiguities in the encodings.  This is particularly relevant with regard to the text encoding of floating point values.  While it is possible to reliably convert between a text and floating point value, there are many nuances that must be properly handled and there is no single definite standard convention that is used.  The actual precision and representations of special values such as +/- inf and NaNs vary between different implementations.
 
  
