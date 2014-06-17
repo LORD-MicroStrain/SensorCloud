@@ -52,7 +52,7 @@ Method    | GET
 ###Response
 * **Success**: 200 OK
 * **Content**: XDR
-```c
+```C
 int x;
   struct	
   {
