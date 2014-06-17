@@ -32,7 +32,8 @@ XML, CSV, JSON are all capable of communicating the same data as XDR, however th
 Concepts
 --------
 SensorCloud organizes data into a hierarchy of different components.  The Device is at the top level component.  A device contains Sensors.  Each Sensor may have one or more channels and each channel may have one or more datastreams.   A datastream is where the sensor data is actually stored.
-Device   [1:N]    Sensor  [1:N]    Channel  [1:N]    Data-stream
+
+***Device***   [1:N]    ***Sensor***  [1:N]    ***Channel***  [1:N]    ***Data-stream***
 
 ### Device ###
 A device represents a single point of aggregation.  A MicroStrain WSDA (Wireless Sensor Data Aggregator) is one example of a device.  A device may be a physical device that is collecting data from multiple sensors or a device could be a virtual device that is pulling data from multiple streams.  The device is a container for sensors.  
