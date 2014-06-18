@@ -21,7 +21,7 @@ Headers| <ul><li>Accept: application/xdr, txt/xml</li><li>Accept-Encoding: compr
 * ***Content***:
   * XDR
         
-        ```C
+        ```D
         struct
         {
             string 		      storedUnit;
@@ -91,7 +91,7 @@ Method | PUT
 Url    | ```:SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/?version=1&auth_token=<auth_token>```
 Headers| Content-Type: application/xdr
 Content: XDR
-```
+```D
 int    	version=1;          	/* int, always 1, may change with future versions */
 string	channelLabel;        	/* utf-8 string, label for channel, 0-50 bytes */
 string	channelDescription;  	/* utf-8 string, description for channel, 0-1000 bytes */
@@ -114,7 +114,7 @@ Method | POST
 Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/?version=1&auth_token=<auth_token>```
 Headers| Content-Type: application/xdr
 Content: XDR
-```
+```D
 int    	version=1;          	/* int, always 1, may change with future versions */
 string	channelLabel;        	/* utf-8 string, label for channel, 0-50 bytes */
 string	channelDescription;  	/* utf-8 string, description for channel, 0-1000 bytes */
