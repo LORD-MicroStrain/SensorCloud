@@ -18,7 +18,7 @@ Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<cha
 Headers| Content-Type: application/xdr
 
 Content: XDR
-```c
+```D
 enum		{TEXT=0, NUMBER=1, CUSTOM=2, BOOL=3 } attributeType
 
 int    		version=1;	/* int, always 1, may change with future versions */
@@ -44,7 +44,7 @@ Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<cha
 Headers| Content-Type: application/xdr
 
 Content: XDR
-```C
+```D
 enum	{TEXT=0, NUMBER=1, CUSTOM=2, BOOL=3 } attributeType
 
 
@@ -87,7 +87,7 @@ Headers| Accept: application/xdr
 
 Content: XDR
 
-```C
+```D
 enum	{ TEXT=0, NUMBER=1, CUSTOM=2, BOOL=3 } attributeType;
 
 MAX_ATTRIBUTES = 25;
@@ -123,7 +123,7 @@ Headers| Accept: application/xdr
   * 404 Not Found - A channel attribute name was used that doesn't exist
 
 Content: XDR
-```C
+```D
 enum 	{ TEXT=0, NUMBER=1, CUSTOM=2, BOOL=3 } attributeType;
 
 MAX_VALUE_LEN = 500;
