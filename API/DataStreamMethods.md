@@ -326,7 +326,7 @@ float	offset;
 ```
 
 ### Response ###
-* ***Success***: 201 Unite Set
+* ***Success***: 201 Unit Set
 * ***Errors***:
   * 404 Not Found - Channel does not have a time-series stream
   * 400 Unit Limit - Cannot create a new unit because there are currently 10 existing units.  10 is the maximum allowed. 
