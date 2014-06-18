@@ -5,6 +5,8 @@ Device Methods
 * [Get Sensors](#get-sensors)
 * [Add Sensor](#add-sensor)
 * [Update Sensor](#update-sensor)
+* [Get Sensor Info](#get-sensor-info)
+* [Delete Sensor](#delete-sensor)
 
 Authenticate
 ------------
