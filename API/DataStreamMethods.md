@@ -7,7 +7,7 @@ Data Stream Methods
 * [Download Time-Series Data](#download-time-series-data)
 * [Download Latest Time-Series Data Point](#download-latest-time-series-data-point)
 * [Get Unit Info](#get-unit-info)
-* [Add/Update Unit](#add/update-unit)
+* [Add or Update Unit](#add-or-update-unit)
 * [Delete Unit](#delete-unit)
 
 Get Data-Stream Info
@@ -27,7 +27,7 @@ Headers| Accept: application/xdr, text/xml
 * ***Content***:
   * XDR
 
-        ```C
+        ```D
         struct
         {
         string			storedUnit<MAX_NAME_LEN>;
@@ -80,7 +80,7 @@ Headers| Accept: application/xdr, text/xml
 * ***Content***:
   * XDR
 
-        ```C
+        ```D
         enum{HERTZ=0, SECONDS=1} sampleRateType;
         
         struct 
@@ -126,7 +126,7 @@ Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<cha
 Headers| Content-Type: application/xdr
 
 Content: XDR
-```C
+```D
 int MAX_DATAPOINTS = 100000;
 
 enum{HERTZ=1, SECONDS=0} sampleRateType;
@@ -170,7 +170,7 @@ There are two optional parameters, showSampleRateBoundary and sampleRate, that c
 ### Request ###
 Method | GET
 -------|----
-Url    | ```:/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/streams/ timeseries/data/?version=1&auth_token=<auth_token>&starttime=<startTime>&endtime=<endtime>[&showSampleRateBoundary=<true|false>[&samplerate=<samplerate>]```
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/streams/ timeseries/data/?version=1&auth_token=<auth_token>&starttime=<startTime>&endtime=<endtime>[&showSampleRateBoundary=<true|false>[&samplerate=<samplerate>]```
 Headers| Accept: application/xdr
 
 ### Response ###
@@ -181,7 +181,7 @@ Headers| Accept: application/xdr
 * ***Content***:
   * XDR if showSampleRateBoundary is False
 
-        ```C
+        ```D
         struct
         {
             unsigned hyper  	timestamp;
@@ -200,7 +200,7 @@ Headers| Accept: application/xdr
 
   * XDR if showSampleRateBoundary is True
 
-        ```C
+        ```D
         enum{HERTZ=0, SECONDS=1} sampleRateType;
         
         struct
@@ -247,7 +247,7 @@ Headers| Accept: application/xdr
   * 404 Not Found - Channel does not have a time-series stream
 * ***Content***: XDR
 
-```C
+```D
 struct
 {
     unsigned hyper  	timestamp;
@@ -277,7 +277,7 @@ Headers| Accept: application/xdr, text/xml
 * ***Content***:
   * XDR:
 
-        ```C
+        ```D
         struct
         {
         	string		storedUnit<MAX_NAME_LEN>;
@@ -306,7 +306,7 @@ Headers| Accept: application/xdr, text/xml
         ```
 
 ===============
-Add/Update Unit
+Add or Update Unit
 ---------------
 Add a new unit to the time-series stream.  If an existing unit exists for the specified time then it will be updated.  Each time-series stream can have up to 10 distinct unit ranges set.  A unit range is identified by the time for which it is applicable.  A unit is in effect for all data until the start time for the next unit.  If there isn't a unit with a higher timestamp then the unit is applicable to the end of the data-stream.  It is recommended to use a timestamp of 0 for the first unit.  storedUnit should be set to the unit the data is stored with, and preferredUnit is the preferred display unit.  SensorCloud will automatically convert the data to the preferred unit in the viewer.
 
@@ -317,7 +317,7 @@ Url    | ```:/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<ch
 Headers| Content-Type: application/xdr
 
 Content: XDR
-```C
+```D
 int	version=1;			/* always 1, may change with future versions */
 string	storedUnit<MAX_NAME_LEN>;
 string	preferredUnit<MAX_NAME_LEN>;
