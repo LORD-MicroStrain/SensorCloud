@@ -33,7 +33,7 @@ Headers| <ul><li>Accept: application/xdr, txt/xml</li><li>Accept-Encoding: compr
         
         struct
         {
-            inttotalBytes;  /* number of bytes contained within the structure.  Allows us to skip streams that we don't care about or understand */
+            int totalBytes;  /* number of bytes contained within the structure.  Allows us to skip streams that we don't care about or understand */
             unit units<>;
         }timeSeriesInfo;
         
