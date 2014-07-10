@@ -48,7 +48,7 @@ Headers| <ul><li>Accept: application/xdr, txt/xml</li><li>Accept-Encoding: compr
             string name<MAX_NAME_LEN>;
             string label<MAX_NAME_LEN>;
             string description<MAX_DESC_LEN>;
-            streamInfodataStreams<>;
+            streamInfo dataStreams<>;
         } channelInfo;
         
         
