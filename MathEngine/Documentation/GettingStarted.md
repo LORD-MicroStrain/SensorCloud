@@ -4,33 +4,47 @@
 
 The time-series repository class is used to access, as well as create, any SensorCloud time-series. Each instance of the SensorCloud repository class is able to search for the time-series on a specific device,
 
-```repo = TimeSeriesRepo("FFFF35A5623")   % can access all time-series on the device with the serial FFFF35A5623```
+```python
+repo = TimeSeriesRepo("FFFF35A5623")   % can access all time-series on the device with the serial FFFF35A5623
+```
 
 This creates a new instance of the time-series repository class named repo. With this time series repository, it is possible to retrieve every time series associated with the device using the getAllTimeSeries method. This will return a list of time-series that match the specified criteria, or all time series if no criteria is specified. If it cannot find any matching time series, it will return an empty list. 
 
 To create a new time series use the  createTimeSeries function, where SampleRateType is 'hertz' or 'seconds'.
 
-```newSeries = repo.createTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )```
+```python
+newSeries = repo.createTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )
+```
 
 The function getAllTimeSeries also accepts the same arguments, though all of them are optional.
 
-```TimeSeriesRepo.getAllTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )```
+```python
+TimeSeriesRepo.getAllTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )
+```
 
 To access all the time-series on a device, call the method without any input arguments.
 
-```allseries = repo.getAllTimeSeries()```
+```python
+allseries = repo.getAllTimeSeries()
+```
 
 To find all the time-series on the Counter sensor.
 
-```allseries = repo.getAllTimeSeries("Counter")```
+```python
+allseries = repo.getAllTimeSeries("Counter")
+```
 
 To to get a list of all time-series on the Pitch channel of the Counter sensor. Multiple time-series on a single channel will be seperated by sample rate.
 
-```allseries = repo.getAllTimeSeries("Counter", "Pitch")```
+```python
+allseries = repo.getAllTimeSeries("Counter", "Pitch")
+```
 
 The sample rate must either be "hertz" or "seconds," and the method will return an error if the sample rate doesn't match either type. To get only the 10 Hz time-series on a device named FlightTest, sensor named Counter, on a channel named Pitch:
 
-```allSeries = repo.getAllTimeSeries("Counter", "Pitch", 10, "hertz")```
+```python
+allSeries = repo.getAllTimeSeries("Counter", "Pitch", 10, "hertz")
+```
 
 ### Accessing time-series properties ###
 
