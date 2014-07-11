@@ -9,25 +9,33 @@ The time-series repository class is used to access, as well as create, any Senso
 This creates a new instance of the time-series repository class named repo. With this time series repository, it is possible to retrieve every time series associated with the device using the getAllTimeSeries method. This will return a list of time-series that match the specified criteria, or all time series if no criteria is specified. If it cannot find any matching time series, it will return an empty list. 
 
 To create a new time series use the  createTimeSeries function, where SampleRateType is 'hertz' or 'seconds'.
+
 ```newSeries = repo.createTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )```
 
 The function getAllTimeSeries also accepts the same arguments, though all of them are optional.
+
 ```TimeSeriesRepo.getAllTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )```
 
 To access all the time-series on a device, call the method without any input arguments.
+
 ```allseries = repo.getAllTimeSeries()```
 
 To find all the time-series on the Counter sensor.
+
 ```allseries = repo.getAllTimeSeries("Counter")```
 
-To to get a list of all time-series on the Pitch channel of the Counter sensor.
+To to get a list of all time-series on the Pitch channel of the Counter sensor. Multiple time-series on a single channel will be seperated by sample rate.
+
 ```allseries = repo.getAllTimeSeries("Counter", "Pitch")```
 
-The sample rate must either be "hertz" or "seconds," and the method will return an error if the sample rate doesn't match either type. To get only the 10 Hz time-series on a device named FlightTest, sensor named Counter, on a channel named Pitch,
-Accessing time-series properties
+The sample rate must either be "hertz" or "seconds," and the method will return an error if the sample rate doesn't match either type. To get only the 10 Hz time-series on a device named FlightTest, sensor named Counter, on a channel named Pitch:
+
 ```allSeries = repo.getAllTimeSeries("Counter", "Pitch", 10, "hertz")```
 
+### Accessing time-series properties ###
+
 You can access the sensorName, channelName, sampleRate, and sampleRateType of an existing time-series by using the getSensorName, getChannelName, getSampleRate, and getSampleRateType methods,
+
 ```python
 >>> series = allSeries[0]
 >>> series.getSensorName()
@@ -43,6 +51,8 @@ hertz
 ### Indexing into a Time-Series ###
 
 All time-series data is stored as a list of tuples, where each tuple represents a single data point of the time-series. Each tuple has two element, where the first element is a time-stamp and the second element is a value. All data points are sorted in order of increasing time-stamp. The time-series class supports both indexing and slicing,
+
+```python
 >>> firstPoint = series[0];   % return the first point in the time-series
 >>> firstTimeStamp = firstPoint[0]  % return the time-stamp of the first point in the time-series
 >>> firstTimeStamp
@@ -50,19 +60,29 @@ All time-series data is stored as a list of tuples, where each tuple represents 
 >>> firstPoint[1]   % return the value of the first point in the time-series
 8.59136962890625
 >>> firstTenPoints = series[: 10]   % return a slice containing the first ten points in the time-series
+```
 
-All time-stamps are recorded as the number of nanoseconds since 1970.  Helper functions for converting to/from SensorCloud nanosecond time-stamps are available in the Helpers module. To convert a time-stamp from nanoseconds to a human-readable date,
+All time-stamps are recorded as the number of nanoseconds since 1970.  Helper functions for converting to/from SensorCloud nanosecond time-stamps are available in the Helpers module. To convert a time-stamp from nanoseconds to a human-readable date:
+
+```python
 >>> import Helpers
 >>> date = Helpers.getDateFromTimeStamp(firstTimeStamp)
 >>> date
-datetime.datetime(2011, 2, 18, 9, 55, 0, 212767)% returns a time datetime object
+datetime.datetime(2011, 2, 18, 9, 55, 0, 212767) # returns a time datetime object
+```
 
-You can also convert a date into a nanosecond time-stamp,
+You can also convert a date into a nanosecond time-stamp:
+
+```python
 >>> Helpers.getTimeStampFromDate(date.year, date.month, date.day, date.hour, date.minute, date.second, date.microsecond)
 1298040900212767000L
+```
 
 To access the first 100 points in the time-series,
+
+```python
 >>> data = series[: 100]
+```
 
 When indexing into a time-series, it will check if the corresponding data has already been pulled from SensorCloud. If it has, it is returned immediately, and if it hasn't then it is pulled and stored in a cache, therefore improving subsequent indexing performance. All SensorCloud time-series data is read-only, therefore you cannot make changes to the time-stamp or values of any points in the time-series.
 
