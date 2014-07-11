@@ -141,7 +141,8 @@ When saving new data to an existing time-series, Math Engine will ensure that th
 The save method will save all the new data to SensorCloud, and reset the "new data buffer" of the time-series,
 
 ```python
->>> len(newSeries.peek()) # peek will return a list of all unsaved data points, but since the time-series has been saved, it will return an empty list
+# peek will return a list of all unsaved data points, but since the time-series has been saved, it will return an empty list
+>>> len(newSeries.peek())
 0
 ```
 
