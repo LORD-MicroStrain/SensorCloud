@@ -5,7 +5,7 @@
 The time-series repository class is used to access, as well as create, any SensorCloud time-series. Each instance of the SensorCloud repository class is able to search for the time-series on a specific device,
 
 ```python
-repo = TimeSeriesRepo("FFFF35A5623")   % can access all time-series on the device with the serial FFFF35A5623
+repo = TimeSeriesRepo("FFFF35A5623")   # Can access all time-series on the device with the serial FFFF35A5623
 ```
 
 This creates a new instance of the time-series repository class named repo. With this time series repository, it is possible to retrieve every time series associated with the device using the getAllTimeSeries method. This will return a list of time-series that match the specified criteria, or all time series if no criteria is specified. If it cannot find any matching time series, it will return an empty list. 
@@ -13,7 +13,7 @@ This creates a new instance of the time-series repository class named repo. With
 To create a new time series use the  createTimeSeries function, where SampleRateType is 'hertz' or 'seconds'.
 
 ```python
-newSeries = repo.createTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )
+TimeSeriesRepo.createTimeSeries( SensorName, ChannelName, SampleRate, SampleRateType )
 ```
 
 The function getAllTimeSeries also accepts the same arguments, though all of them are optional.
@@ -25,25 +25,25 @@ TimeSeriesRepo.getAllTimeSeries( SensorName, ChannelName, SampleRate, SampleRate
 To access all the time-series on a device, call the method without any input arguments.
 
 ```python
-allseries = repo.getAllTimeSeries()
+>>> allseries = repo.getAllTimeSeries()
 ```
 
 To find all the time-series on the Counter sensor.
 
 ```python
-allseries = repo.getAllTimeSeries("Counter")
+>>> allseries = repo.getAllTimeSeries("Counter")
 ```
 
 To to get a list of all time-series on the Pitch channel of the Counter sensor. Multiple time-series on a single channel will be seperated by sample rate.
 
 ```python
-allseries = repo.getAllTimeSeries("Counter", "Pitch")
+>>> allseries = repo.getAllTimeSeries("Counter", "Pitch")
 ```
 
 The sample rate must either be "hertz" or "seconds," and the method will return an error if the sample rate doesn't match either type. To get only the 10 Hz time-series on a device named FlightTest, sensor named Counter, on a channel named Pitch:
 
 ```python
-allSeries = repo.getAllTimeSeries("Counter", "Pitch", 10, "hertz")
+>>> allSeries = repo.getAllTimeSeries("Counter", "Pitch", 10, "hertz")
 ```
 
 ### Accessing time-series properties ###
@@ -67,13 +67,13 @@ hertz
 All time-series data is stored as a list of tuples, where each tuple represents a single data point of the time-series. Each tuple has two element, where the first element is a time-stamp and the second element is a value. All data points are sorted in order of increasing time-stamp. The time-series class supports both indexing and slicing,
 
 ```python
->>> firstPoint = series[0];   % return the first point in the time-series
->>> firstTimeStamp = firstPoint[0]  % return the time-stamp of the first point in the time-series
+>>> firstPoint = series[0];        # return the first point in the time-series
+>>> firstTimeStamp = firstPoint[0] # return the time-stamp of the first point in the time-series
 >>> firstTimeStamp
 1298040900212767000L
->>> firstPoint[1]   % return the value of the first point in the time-series
+>>> firstPoint[1]                  # return the value of the first point in the time-series
 8.59136962890625
->>> firstTenPoints = series[: 10]   % return a slice containing the first ten points in the time-series
+>>> firstTenPoints = series[: 10]  # return a slice containing the first ten points in the time-series
 ```
 
 All time-stamps are recorded as the number of nanoseconds since 1970.  Helper functions for converting to/from SensorCloud nanosecond time-stamps are available in the Helpers module. To convert a time-stamp from nanoseconds to a human-readable date:
@@ -108,23 +108,23 @@ Data can appended data to any new or existing time-series using the push method.
 
 ```python
 >>> newSeries = repo.createTimeSeries("Counter", "Pitch", 10, "hertz")
->>> time = [.01 * i for i in range(0, 300)] % create a vector of time values, from 0 to 3, sampled at 100 Hz
->>> signal = [sin(2 * pi * t * 1.1) for t in time] % create a 1.1 Hz sine wave
->>> startTime += getTimeStampFromDate(2010, 10, 7, 6, 14, 22, 7524); % make all time-stamps relative to 10/7/2010 6:14:22.007524  
->>> time = [startTime + t * 1000000000 for t in time]  % convert seconds to nanoseconds
->>> newSeries.push([(time[i], signal[i]) for i in range(0, 300)])   % push 300 new data points to the time-series, as a list of tuples
+>>> time = [.01 * i for i in range(0, 300)]                          # create a vector of time values, from 0 to 3, sampled at 100 Hz
+>>> signal = [sin(2 * pi * t * 1.1) for t in time]                   # create a 1.1 Hz sine wave
+>>> startTime += getTimeStampFromDate(2010, 10, 7, 6, 14, 22, 7524); # make all time-stamps relative to 10/7/2010 6:14:22.007524  
+>>> time = [startTime + t * 1000000000 for t in time]                # convert seconds to nanoseconds
+>>> newSeries.push([(time[i], signal[i]) for i in range(0, 300)])    # push 300 new data points to the time-series, as a list of tuples
 ```
 
 Data that's been pushed to the time-series isn't immediately saved to SensorCloud, instead it's stored in a "new data buffer" as a stack (last-in-first-out). Data that's been pushed onto a time-series can be removed using the pop method.
 
 ```python
->>> newSeries.pop(20)   % remove the last 20 points added to the time-series
+>>> newSeries.pop(20)   # Remove the last 20 points added to the time-series
 ```
 
 All the new, unsaved data, can accessed using the peek function
 
 ```python
->>> lastTenPoints = newSeries.peek(10)   % return a list containing the last 10 points added
+>>> lastTenPoints = newSeries.peek(10)   # Return a list containing the last 10 points added
 ```
 
 If the second value is omitted, then peek will return all new data that's been added.
@@ -148,6 +148,8 @@ The save method will save all the new data to SensorCloud, and reset the "new da
 Example
 
 The following example demonstrates all the key features of the SensorCloud time-series class. This script accesses temperature data available in SensorCloud, finds all the min and max temperatures each day, then uploads the results to SensorCloud
+
+```python
 ProcessTemperature(uploadSensor):
     repo = TimeSeriesRepo("temperature")
     temperature = repo.getAllTimeSeries('SV1', 'temp')[0]
@@ -178,3 +180,4 @@ ProcessTemperature(uploadSensor):
     minSeries.save()
     maxSeries.save()
     deltaSeries.save()
+```
