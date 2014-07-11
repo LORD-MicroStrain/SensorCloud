@@ -100,40 +100,51 @@ To access the first 100 points in the time-series,
 
 When indexing into a time-series, it will check if the corresponding data has already been pulled from SensorCloud. If it has, it is returned immediately, and if it hasn't then it is pulled and stored in a cache, therefore improving subsequent indexing performance. All SensorCloud time-series data is read-only, therefore you cannot make changes to the time-stamp or values of any points in the time-series.
 
-The len method isn't supported for the SensorCloud time-series. Since new data can be uploaded at any moment, the time-series doesn't have a fixed size.  Attempting to invoke this method results in an error message
->>> len(series)
-Traceback (most recent call last):
-File "<console>", line 1, in <module>
-TypeError: object of type 'TimeSeriesData' has no len()
+The len method isn't supported for the SensorCloud time-series. Since new data can be uploaded at any moment, the time-series doesn't have a fixed size. For these same reasons, the end operator isn't support either.
 
-For these same reasons, the end operator isn't support either.
-Adding new data
+### Adding new data ###
 
-Data can appended data to any new or existing time-series using the push method. All new data must be added as a list of tuples, where the first element is a time-stamp and the second element is a value,
+Data can appended data to any new or existing time-series using the push method. All new data must be added as a list of tuples, where the first element is a time-stamp and the second element is a value.
+
+```python
 >>> newSeries = repo.createTimeSeries("Counter", "Pitch", 10, "hertz")
 >>> time = [.01 * i for i in range(0, 300)] % create a vector of time values, from 0 to 3, sampled at 100 Hz
 >>> signal = [sin(2 * pi * t * 1.1) for t in time] % create a 1.1 Hz sine wave
 >>> startTime += getTimeStampFromDate(2010, 10, 7, 6, 14, 22, 7524); % make all time-stamps relative to 10/7/2010 6:14:22.007524  
 >>> time = [startTime + t * 1000000000 for t in time]  % convert seconds to nanoseconds
 >>> newSeries.push([(time[i], signal[i]) for i in range(0, 300)])   % push 300 new data points to the time-series, as a list of tuples
+```
 
-Data that's been pushed to the time-series isn't immediately saved to SensorCloud, instead it's stored in a "new data buffer" as a stack (last-in-first-out). Data that's been pushed onto a time-series can be removed using the pop method,
+Data that's been pushed to the time-series isn't immediately saved to SensorCloud, instead it's stored in a "new data buffer" as a stack (last-in-first-out). Data that's been pushed onto a time-series can be removed using the pop method.
+
+```python
 >>> newSeries.pop(20)   % remove the last 20 points added to the time-series
+```
 
 All the new, unsaved data, can accessed using the peek function
+
+```python
 >>> lastTenPoints = newSeries.peek(10)   % return a list containing the last 10 points added
+```
 
 If the second value is omitted, then peek will return all new data that's been added.
 Saving a time-series to SensorCloud
 
 The data that has been appended to any new or existing time-series can be saved using the save method
+
+```python
 >>> newSeries.save()
+```
 
 When saving new data to an existing time-series, Math Engine will ensure that the first time-stamp of the new data is greater than the last time-stamp of the old data, and that the time-stamps of the new data increase monotonically. These measures ensure the integrity of the any time-series isn't inadvertently compromised when pushing new data to SensorCloud.
 
 The save method will save all the new data to SensorCloud, and reset the "new data buffer" of the time-series,
->>> len(newSeries.peek()) % peek will return a list of all unsaved data points, but since the time-series has been saved, it will return an empty list
+
+```python
+>>> len(newSeries.peek()) # peek will return a list of all unsaved data points, but since the time-series has been saved, it will return an empty list
 0
+```
+
 Example
 
 The following example demonstrates all the key features of the SensorCloud time-series class. This script accesses temperature data available in SensorCloud, finds all the min and max temperatures each day, then uploads the results to SensorCloud
