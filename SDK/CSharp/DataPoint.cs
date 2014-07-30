@@ -39,7 +39,9 @@ namespace SensorCloud
 		{
 			get
 			{
-				return new DateTime((long)(UnixTimestamp / 100) + 116444736000000000);
+                System.DateTime unixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+                System.DateTime unixDT = epoch.AddTicks((long)(UnixTimestamp/ 100));
+                return unixDT;
 			}
 		}
 

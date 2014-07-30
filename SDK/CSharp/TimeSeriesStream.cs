@@ -117,7 +117,7 @@ namespace SensorCloud
 								   .Param("version", "1")
 								   .Param("starttime", startTime)
 								   .Param("endtime", endTime)
-								   .ContentType("application/xdr")
+								   .Accept("application/xdr")
 								   .Get();
 
 			// check the response code for success

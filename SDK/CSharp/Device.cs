@@ -114,6 +114,87 @@ namespace SensorCloud
 			return new Sensor(sensorName, _requests);
 		}
 
+		/// <summary>
+		/// Get a list of existing Sensors for this device.
+		/// </summary>
+		public List<Sensor> GetSensors()
+		{
+				List<Sensor> outputList = new List<Sensor>();
+				//make a get request for channel attributes to determine if the channel exists
+				var request = _requests.url("/sensors/")
+															.Param("version", "1")
+															.Accept("application/xdr")
+															.Get();
+
+				// check the response code for success
+				if (request.ResponseCode == HttpStatusCode.OK)
+				{
+
+						var ms = new MemoryStream(request.Raw);
+						var xdr = new XdrReader(ms);
+						//The first value is the version.  We expect this to be 1
+						int version = xdr.ReadInt();
+						if (version != 1)
+						{
+								throw new SensorCloudException("Unsupported xdr version");
+						}
+
+						//The next value is an integer telling us how many sensors to unpack
+						//Each sensor has its info packed a certain way, so this allows us to know how many sensors we must unpack
+						int sensorCount = xdr.ReadInt();
+						//loop through sensors
+						for(var i=0; i < sensorCount; i++)
+						{
+								string sensorName = xdr.ReadString(1000);
+								//for example's sake, I'm going to push a Sensor Object onto our output array
+								//This object only needs the Sensor name, and will fetch the Sensor info on it's own
+								//However, to get all sensor names we must still parse all of the stream.  You can modify 
+								//this function to meet your own needs, and return a different set of information 
+								//tailored to what you need.
+								outputList.Add(new Sensor(sensorName, _requests));
+
+								string sensortype = xdr.ReadString(1000);
+								string sensorlabel = xdr.ReadString(1000);  //a token is generally about 60 chars.  Limit the read to at most 1000 chars as a precation so in their is a protocol error we don't try to allocate lots of memory
+								string sensordescripiton = xdr.ReadString(1000);
+
+								//the next value is the number of channels this sensor has
+								int channelCount = xdr.ReadInt();
+								//loop all channels
+								for (var j=0; j < channelCount; j++)
+								{
+										string channelName = xdr.ReadString(1000);
+										string channelLabel = xdr.ReadString(1000);
+										string channelDescription = xdr.ReadString(1000);
+
+										//This tells us how many datastreams the channel has
+										//This should be one, as we only currently support TimeSeries, but could grow as more stream types are added
+										int streamCount = xdr.ReadInt();
+										//loop through streams
+										for (var k=0; k < streamCount; k++)
+										{
+												//the first value in the stream is the type of stream.  We expect this to be TS_V1, meaning timeseries version 1
+												string streamType = xdr.ReadString(1000);
+												//the second value of a stream is the number of bytes that describes the stream.  
+												//This is convenient as it allows us to just skip the stream if we are not interested in it.  
+												//For this example's purpose, we are uninterested and will simply skip ahead in the xdr.  We do this by reading the number bytes, but doing anything
+												//with the data
+												int totalBytes = xdr.ReadInt();
+												//just reading the bytes by previously parsed length advances the xdr reader forward in the data
+												xdr.ReadBytes(totalBytes);
+										}
+
+								}
+						}
+
+						return outputList;
+
+				}
+				else
+				{
+						throw SensorCloudException.GenerateSensorCloudException(request, "Get Sensors Failed");
+				}
+		}
+
 
 		/// <summary>
 		/// Delete's a Sensor from the device.  All channels must be deleted before you can delete the Sensor.
