@@ -57,12 +57,20 @@ namespace SensorCloud
 			}
 		}
 
+        private static ulong convertToEpoch(DateTime value)
+        {
+            DateTime epochDT = new DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+            ulong unixTimestamp = (ulong)(value - epochDT).TotalSeconds;
+            ulong nanoTimestamp = unixTimestamp * 1000000000;
+            return nanoTimestamp;
+        }
+
 		internal TimeSeriesStream(string sensorName, string channelName, IRequests requests)
 			: this(sensorName, channelName, requests, null)
 		{}
 
 		internal TimeSeriesStream(string sensorName, string channelName, IRequests requests, DateTime start, DateTime end)
-			: this(sensorName, channelName, requests, (ulong)start.Ticks*100, (ulong)end.Ticks*100)
+            : this(sensorName, channelName, requests, convertToEpoch(start), convertToEpoch(end))
 		{}
 
 		internal TimeSeriesStream(string sensorName, string channelName, IRequests requests, ulong start, ulong end)
@@ -70,7 +78,7 @@ namespace SensorCloud
 		{}
 
 		internal TimeSeriesStream(string sensorName, string channelName, IRequests requests, DateTime start, DateTime end, SampleRate samplerate)
-			: this(sensorName, channelName, requests, (ulong)start.Ticks * 100, (ulong)end.Ticks * 100)
+            : this(sensorName, channelName, requests, convertToEpoch(start), convertToEpoch(end))
 		{}
 
 		internal TimeSeriesStream(string sensorName, string channelName, IRequests requests, SampleRate sampleRate)
@@ -94,7 +102,7 @@ namespace SensorCloud
 
 		public TimeSeriesStream Range(DateTime start, DateTime end)
 		{
-			return Range((ulong)start.Ticks*100, (ulong)end.Ticks*100);
+            return Range(convertToEpoch(start), convertToEpoch(end));
 		}
 
 		public TimeSeriesStream Range(ulong startTimestampNanoseconds, ulong endTimestampNanoseconds)
