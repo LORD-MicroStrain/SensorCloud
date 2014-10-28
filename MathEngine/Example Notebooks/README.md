@@ -4,6 +4,9 @@
 
 A tutorial notebook for getting started with MathEngine and SensorCloud data.
 
+[Bearing Data Analysis](http://nbviewer.ipython.org/github/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/Lab%20Bearing%20Analysis.ipynb)
+
+Performs frequency analysis on burst data to monitor bearing health.
 
 [Notch Filter:](http://nbviewer.ipython.org/github/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/LORD%20Notch%20Filter.ipynb)
 
