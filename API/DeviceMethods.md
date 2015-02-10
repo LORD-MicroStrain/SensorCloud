@@ -66,7 +66,7 @@ Method    | GET
   
   struct
   {
-      inttotalBytes;           /* number of bytes contained within the structure.  Allows us to skip streams that we don't care about or understand */
+      int totalBytes;           /* number of bytes contained within the structure.  Allows us to skip streams that we don't care about or understand */
       unit units<>;
   }timeSeriesInfo;
   
@@ -81,7 +81,7 @@ Method    | GET
       string name<MAX_NAME_LEN>;
       string label<MAX_NAME_LEN>;
       string description<MAX_DESC_LEN>;
-      streamInfodataStreams<>;
+      streamInfo dataStreams<>;
   } channelInfo;
   
   struct
