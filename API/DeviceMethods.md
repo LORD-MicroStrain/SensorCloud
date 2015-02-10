@@ -55,7 +55,6 @@ Method    | GET
 * **Success**: 200 OK
 * **Content**: XDR
 ```D
-int x;
   struct	
   {
       string        	  storedUnit;
