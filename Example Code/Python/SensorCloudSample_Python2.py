@@ -212,6 +212,64 @@ def downloadData(server, auth_token, device_id, sensor_name, channel_name, start
 		print "Reason: %s" % response.reason
 		return data
 
+def GetSensors(server, auth_token, device_id):
+	"""
+	Download the Sensors and Channel information for the Device.
+	Packs into a dict for easy parsing
+	"""
+	conn = httplib.HTTPSConnection(server)
+	
+	url = "/SensorCloud/devices/%s/sensors/?version=1&auth_token=%s" % (device_id, auth_token)
+	headers = {"Accept":"application/xdr"}
+	conn.request("GET", url=url, headers=headers)
+	sensors = {}
+	response = conn.getresponse()
+	if response.status is httplib.OK:
+		print "Data Retrieved"
+		unpacker = xdrlib.Unpacker(response.read())
+		#unpack version, always first
+		unpacker.unpack_int()
+		#sensor info is an array of sensor structs.  In XDR, first you read an int, and that's the number of items in the array.  You can then loop over the number of elements in the array
+		numSensors = unpacker.unpack_int()
+		for i in xrange(numSensors):
+			sensorName = unpacker.unpack_string()
+			sensorType = unpacker.unpack_string()
+			sensorLabel = unpacker.unpack_string()
+			sensorDescription = unpacker.unpack_string()
+			#using sensorName as a key, add info to sensor dict
+			sensors[sensorName] = {"name":sensorName, "type":sensorType, "label":sensorLabel, "description":sensorDescription, "channels":{}}
+			#channels for each sensor is an array of channelInfo structs.  Read array length as int, then loop through the items
+			numChannels = unpacker.unpack_int()
+			for j in xrange(numChannels):
+				channelName = unpacker.unpack_string()
+				channelLabel = unpacker.unpack_string()
+				channelDescription = unpacker.unpack_string()
+				#using channel name as a key, add info to sensor's channel dict
+				sensors[sensorName]["channels"][channelName] = {"name":channelName, "label":channelLabel, "description":channelDescription, "streams":{}}
+				#dataStreams for each channel is an array of streamInfo structs, Read array length as int, then loop through the items
+				numStreams = unpacker.unpack_int()
+				for k in xrange(numStreams):
+					#streamInfo is a union, where the type indicates which stream struct to use.  Currently we only support timeseries version 1, so we'll just code for that
+					streamType = unpacker.unpack_string()
+					if streamType == "TS_V1":
+						#TS_V1 means we have a timeseriesInfo struct
+						#total bytes allows us to jump ahead in our buffer if we're uninterested in the units.  For verbosity, we will parse them.
+						total_bytes = unpacker.unpack_int()
+						#units for each data stream is an array of unit structs.  Read array length as int, then loop through the items
+						numUnits = unpacker.unpack_int()
+						#add TS_V1 to streams dict
+						sensors[sensorName]["channels"][channelName]["streams"]["TS_V1"] = {"units":{}}
+						for l in xrange(numUnits):
+							storedUnit = unpacker.unpack_string()
+							preferredUnit = unpacker.unpack_string()
+							unitTimestamp = unpacker.unpack_uhyper()
+							slope = unpacker.unpack_float()
+							offset = unpacker.unpack_float()
+							#using unitTimestamp as a key, add unit info to unit dict
+							sensors[sensorName]["channels"][channelName]["streams"]["TS_V1"]["units"][str(unitTimestamp)] = {"stored":storedUnit, 
+							"preferred":preferredUnit, "unitTimestamp":unitTimestamp, "slope":slope, "offset":offset}
+	return sensors
+
 if __name__ == "__main__":
 
 	#info for API key authentication
@@ -247,3 +305,5 @@ if __name__ == "__main__":
 	print "Downloaded %s points" % len(data)
 	print "First point %s" % str(data[0])
 	print "Last point %s" % str(data[-1])
+	
+	sensors = GetSensors(server, auth_token, device_id)
