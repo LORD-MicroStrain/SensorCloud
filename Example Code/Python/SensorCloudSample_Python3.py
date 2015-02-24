@@ -193,9 +193,9 @@ def downloadData(server, auth_token, device_id, sensor_name, channel_name, start
     print("Downloading data...")
     conn.request("GET", url=url, headers=headers)
     response = conn.getresponse()
+    data = []
     if response.status is http.client.OK:
         print("Data retrieved")
-        data = []
         unpacker = xdrlib.Unpacker(response.read())
         while True:
             try:
