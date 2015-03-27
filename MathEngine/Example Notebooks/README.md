@@ -15,3 +15,7 @@ A method to apply a bandstop or notch filter to a data set for the purpose of re
 [External Data Sources - Weather Underground:](http://nbviewer.ipython.org/github/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/External%20Data%20Sources%20-%20Weather%20Underground.ipynb)
 
 Demonstrates pulling in data from a 3rd party API, and adding the data as new channels in SensorCloud.
+
+[Demo Structures:](http://nbviewer.ipython.org/github/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/Demo%20Structures.ipynb)
+
+Demonstrates Simple MathEngine tools for structural analysis.
