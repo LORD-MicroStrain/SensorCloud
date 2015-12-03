@@ -100,7 +100,7 @@ Method    | GET
 =============
 Add Sensor
 -------------
-Add a new sensor to a device.  A sensor groups related channels of data.  To create a sensor a unique name must be applied (unique relative to the device).  The name will be used to access the sensor after it is created.  A sensor’s name is immutable; once it is created it cannot be changed.  The sensor label is mutable, and can be updated at any time.  Generally the label is used at the presentation layer to indentify the sensor to the user, so the presentation of the sensor can be modified using the label.  The sensor name must be between 1 and 50 characters in the set [a-z,A-Z,0-9,-,_].
+Add a new sensor to a device.  A sensor groups related channels of data.  To create a sensor a unique name must be applied (unique relative to the device).  The name will be used to access the sensor after it is created.  A sensor’s name is immutable; once it is created it cannot be changed.  The sensor label is mutable, and can be updated at any time.  Generally the label is used at the presentation layer to indentify the sensor to the user, so the presentation of the sensor can be modified using the label.  The sensor name must be between 1 and 50 characters in the set [a-z A-Z 0-9 _ - .].
 
 ### Request
 Method | PUT
@@ -118,7 +118,7 @@ string	sensorDescription; /* utf-8 string, description for sensor, 0-1000 bytes 
 ### Response
 * **Success**: 201 Created
 * **Errors**:
-   * 400 Invalid sensor name - Sensor name must be between 1 and 50 characters and only contain the following [a-z A-Z 0-9 _ -]
+   * 400 Invalid sensor name - Sensor name must be between 1 and 50 characters and only contain the following [a-z A-Z 0-9 _ - .]
    * 400 Sensor exists - A Sensor with the same name already exists
 
 =============
