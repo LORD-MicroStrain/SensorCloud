@@ -4,7 +4,7 @@
 
 [Bearing Data Analysis](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/Lab%20Bearing%20Analysis.ipynb) - Performs frequency analysis on burst data to monitor bearing health.
 
-[A-Bearing Data Analysis](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/A_Bearing%20Monitoring%20Analysis%20ISO%2010816-3.ipynb) - Performs frequency analysis on burst data to monitor bearing health.
+[ISO 10816-3 Bearing Analysis](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/ISO%2010816-3%20Bearing%20Analysis.ipynb) - Performs frequency analysis on burst data to monitor bearing health.
 
 [Notch Filter](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/MathEngine/Example%20Notebooks/LORD%20Notch%20Filter.ipynb)- A method to apply a bandstop or notch filter to a data set for the purpose of removing a specific series of frequency components.
 
