@@ -239,23 +239,29 @@ The first column of the CSV file is the timestamp which is used for all channels
 
 * ***Parameters***:
   * selector_ts - list of sensor and channels to include in the download
+    ```D
     <selector_ts>  ::= <sensor-list>
     <sensor-list>  ::= <sensor | ,<sensor-list>
     <sensor>       ::= sensor-name(<channel-list>)
     <channel-list> ::= <channel> | ,<channel-list>
     <channel>      ::= channel-name
+    ```
     example = selector_ts=sensor_1(ch1,ch2),sensor_2(ch1,ch2,ch3),sensor_7(ch6)
 
   * startTime, endTime - Text to use to represent a NaN (Not a Number).  This parameter is optional.  Value specified as nanSymbol will be used to represent NaNs with the exception of "none", "excel", and "default" resulting in the mapping outlined below.  If nanSymbol is not provided then the default of "NaN" will be used.
+    ```D
     "none" => ""
     "excel" -> "#N/A"
     "default" => "NaN"
+    ```
 
   * timeFmt - Desired format of timestamps.  This parameter is optional.  Value must be "standard", "unix", or "relative".
+    ```D
     "standard" - Standard readable format of month/day/year hour:minute:second.subseconds
       Example: 10/21/2015 15:30:30.000105800
     "unix" - Timestamp relative to Unix Epoc (Jan 1, 1970).  Timestamp value is nanoseconds since epoch.
     "relative" - All timestamps are relative to the first data point.  Timestamp value is in nanoseconds.
+    ```
 
 ### Request ###
 Method | GET
