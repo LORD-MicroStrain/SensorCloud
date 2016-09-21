@@ -5,6 +5,7 @@ Data Stream Methods
 * [Get Sample Rate Info](#get-sample-rate-info)
 * [Add Time-Series Data](#add-time-series-data)
 * [Download Time-Series Data](#download-time-series-data)
+* [Download CSV Data](#download-csv-data)
 * [Download Latest Time-Series Data Point](#download-latest-time-series-data-point)
 * [Get Unit Info](#get-unit-info)
 * [Add or Update Unit](#add-or-update-unit)
@@ -228,6 +229,51 @@ Headers| Accept: application/xdr
                .
         point||sampleRate data-N;
         ```
+
+=================
+Download CSV Data
+-----------------
+Download sensor data in CSV format.  Downloading a CSV file allows for multiple sensors and channels in the same file.  The CSV format is supported by a wide range of applications and has become a de facto standard for the exchange of sensor data.  The CSV format does have some disadvantages.  It takes longer for SensorCloud to server CSV files than it does to serve the raw data-stream.  The resulting size of a CSV file is also larger than the same data in a binary format.
+
+The first column of the CSV file is the timestamp which is used for all channels.  Not all channels will have data at all timestamps when multiple channels are selected.  An empty value is inserted for a channel that doesn&#39;t have a corresponding value for a specific timestamp.
+
+* ***Parameters***:
+  * selector_ts - list of sensor and channels to include in the download
+    <selector_ts>  ::= <sensor-list>
+    <sensor-list>  ::= <sensor | ,<sensor-list>
+    <sensor>       ::= sensor-name(<channel-list>)
+    <channel-list> ::= <channel> | ,<channel-list>
+    <channel>      ::= channel-name
+    example = selector_ts=sensor_1(ch1,ch2),sensor_2(ch1,ch2,ch3),sensor_7(ch6)
+
+  * startTime, endTime - Text to use to represent a NaN (Not a Number).  This parameter is optional.  Value specified as nanSymbol will be used to represent NaNs with the exception of "none", "excel", and "default" resulting in the mapping outlined below.  If nanSymbol is not provided then the default of "NaN" will be used.
+    "none" => ""
+    "excel" -> "#N/A"
+    "default" => "NaN"
+
+  * timeFmt - Desired format of timestamps.  This parameter is optional.  Value must be "standard", "unix", or "relative".
+    "standard" - Standard readable format of month/day/year hour:minute:second.subseconds
+      Example: 10/21/2015 15:30:30.000105800
+    "unix" - Timestamp relative to Unix Epoc (Jan 1, 1970).  Timestamp value is nanoseconds since epoch.
+    "relative" - All timestamps are relative to the first data point.  Timestamp value is in nanoseconds.
+
+### Request ###
+Method | GET
+-------|----
+Url    | ```/SensorCloud/devices/<device_id>/download/timeseries/csv/?selector_ts=<selector_ts>&startTime=<startTime>&endTime=<endTime>&nan=<nanSymbol>&timeFmt=<timeFmt>&version=1&auth_token=<auth_token>```
+Headers| Accept: text/csv
+
+### Response ###
+* ***Success***: 200 OK
+* ***Errors***:
+  Note: no errors are raised for invalid sensors and/or channels.  The valid data will be sent and invalid channels will be ignored.
+* ***Content***: CSV
+```D
+Timestamp, <sn1>:<ch1>, <sn2>:<ch2>, ...
+Timestamp1, value_1, value_2, ...
+Timestamp2, value_1, value_2, ...
+...
+```
 
 ======================================
 Download Latest Time-Series Data Point
