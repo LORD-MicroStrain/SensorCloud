@@ -164,6 +164,8 @@ There are two optional parameters, showSampleRateBoundary and sampleRate, that c
 
 ***sampleRate***: (example hertz-23, seconds-100) -  When specified, only data points that where uploaded with the specified timestamp are returned.  This does not down-sample data.  It will only download data that had the exact sample-rate specified when uploaded. A listing of all the sample-rates for a channel can be obtained by calling “Get Sample Rate Info”.
 
+***startTime, endTime***: (example 1388534400000000000) - A Unix timestamp in nanoseconds
+
 ### Request ###
 Method | GET
 -------|----
@@ -243,7 +245,12 @@ The first column of the CSV file is the timestamp which is used for all channels
 ```
     example = selector_ts=sensor_1(ch1,ch2),sensor_2(ch1,ch2,ch3),sensor_7(ch6)
 
-  * startTime, endTime - Text to use to represent a NaN (Not a Number).  This parameter is optional.  Value specified as nanSymbol will be used to represent NaNs with the exception of "none", "excel", and "default" resulting in the mapping outlined below.  If nanSymbol is not provided then the default of "NaN" will be used.
+  * startTime, endTime - A Unix timestamp in nanoseconds
+```D
+    example = 1388534400000000000
+```
+  
+  * nan - Text to use to represent a NaN (Not a Number).  This parameter is optional.  Value specified as nanSymbol will be used to represent NaNs with the exception of "none", "excel", and "default" resulting in the mapping outlined below.  If nanSymbol is not provided then the default of "NaN" will be used.
 ```D
     "none" => ""
     "excel" -> "#N/A"
