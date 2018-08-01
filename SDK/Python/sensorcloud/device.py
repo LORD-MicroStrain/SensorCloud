@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 from sensorcloudrequest import SensorCloudRequests
 from sensor import Sensor
 from cache import Cache
+from error import *
 
 DEFAULT_AUTH_SERVER = "https://sensorcloud.microstrain.com"
 
@@ -44,7 +45,7 @@ class Device(object):
         if response.status_code == httplib.OK: return True
         if response.status_code == httplib.NOT_FOUND: return False
 
-        raise Exception("has_sensor failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+        raise error(response, "has sensor")
 
     def url(self, url_path):
         return self._requests.url(url_path)
@@ -85,7 +86,7 @@ class Device(object):
 
         #if response is 201 created then we know the sensor was added
         if response.status_code != httplib.CREATED:
-            raise Exception("add sensor failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "add sensor")
 
         return self.sensor(sensor_name)
 

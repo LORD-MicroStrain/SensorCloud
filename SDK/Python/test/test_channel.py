@@ -1,24 +1,10 @@
 import unittest
-import xdrlib
 import mock
 from mock import Mock
 
 import sensorcloud
 
-def authRequest():
-    import xdrlib
-    token = "fake_token"
-    server = "dsx.sensorcloud.microstrain.com"
-    packer = xdrlib.Packer()
-    packer.pack_string(token)
-    packer.pack_string(server)
-    packer.pack_string("")
-
-    authRequestMock = Mock()
-    authRequestMock.doRequest = Mock()
-    authRequestMock.status_code = 200
-    authRequestMock.raw = packer.get_buffer()
-    return authRequestMock
+from helpers import authRequest
 
 class TestUpload(unittest.TestCase):
 
@@ -38,19 +24,15 @@ class TestUpload(unittest.TestCase):
             channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
 
     def test_createAndRetryOn404(self):
-        auth = authRequest()
-
         sensorNotFound = Mock()
-        sensorNotFound.doRequest = Mock()
         sensorNotFound.status_code = 404
         sensorNotFound.text = '{"errorcode": "404-001", "message": ""}'
 
         created = Mock()
-        created.doRequest = Mock()
         created.status_code = 201
 
         request = Mock()
-        request.side_effect = [auth, sensorNotFound, created, created, created]
+        request.side_effect = [authRequest(), sensorNotFound, created, created, created]
         sensorcloud.webrequest.Requests.Request = request
 
         device = sensorcloud.Device("FAKE", "fake")

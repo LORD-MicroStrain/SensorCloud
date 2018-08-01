@@ -13,6 +13,7 @@ import httplib
 import json
 
 from channel import Channel
+from error import *
 
 
 class DoRequest_createSensor:
@@ -30,14 +31,7 @@ class DoRequest_createSensor:
         """
         if response.status_code == httplib.NOT_FOUND:
 
-            msg = {}
-            try:
-                msg = json.loads(response.text)
-            except:
-                #log the error, but if we couldn't parse the response, we will retry the original request and let it propogate through
-                logger.exception("exception while trying to parse 404 response in the Sensor's doRequest override")
-
-            if msg.get("errorcode") == "404-001": #Sensor not found
+            if response.scerror and response.scerror.code == "404-001": #Sensor not found
                 logger.info("intercepted '404-001 Sensor Not Found' error and adding the sensor %s", self._sensor.name)
                 self._sensor.device.add_sensor(self._sensor.name)
 

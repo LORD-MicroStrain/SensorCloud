@@ -31,7 +31,11 @@ class ServerError(HTTPError):
     def __init__(self, response, message):
         super(ServerError, self).__init__(response, message)
 
-class UnauthorizedError(HTTPError):
+class UserError(HTTPError):
+    def __init__(self, response, message):
+        super(UserError, self).__init__(response, message)
+
+class UnauthorizedError(UserError):
     def __init__(self, response, message):
         super(UnauthorizedError, self).__init__(response, message)
 
@@ -40,12 +44,19 @@ class QuotaExceededError(UnauthorizedError):
         super(QuotaExceededError, self).__init__(response, message)
 
 def error(response, message):
+    # setup specific errors
     if response.scerror:
         if response.status_code == 401:
             if response.scerror.code == "401-005":
                 return QuotaExceededError(response, message)
-    if response.status_code >= 500:
-        return ServerError(response, message)
     if response.status_code == 401:
         return UnauthorizedError(response, message)
+
+    # setup error groups
+    if response.status_code >= 500:
+        return ServerError(response, message)
+    if response.status_code >= 400:
+        return UserError(response, message)
+
+    # generic error
     return HTTPError(response, message)
