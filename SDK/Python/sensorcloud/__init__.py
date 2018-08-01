@@ -9,8 +9,9 @@ import sys
 from samplerate import SampleRate
 from device import Device
 from point import Point
+from error import *
 
-__version__ = '0.2.2'
+__version__ = '0.3.0'
 
 # True to reauthenticate on token expiration, false otherwise
 Reauthenticate = True

@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 from datetime import datetime
 import httplib
 import xdrlib
+import warnings
 
 from util import nanosecond_to_timestamp, timestamp_to_nanosecond
 from point import Point
@@ -55,12 +56,15 @@ class TimeSeriesStream(object):
     @property
     def startTimestamp(self):
         return nanosecond_to_timestamp(self.startTimestampNanoseconds)
+    
+    @property
+    def endTimestamp(self):
+        return nanosecond_to_timestamp(self.endTimestampNanoseconds)
 
     @property
     def EndTimestamp(self):
-        return nanosecond_to_timestamp(self.endTimestampNanoseconds)
-
-
+        warnings.warn("deprecated", DeprecationWarning)
+        return self.endTimestamp
 
     def  __iter__(self):
 

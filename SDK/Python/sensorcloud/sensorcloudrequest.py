@@ -12,11 +12,7 @@ import webrequest
 import httplib
 import xdrlib
 
-
-class AuthenticationException(Exception):
-    def __init__(self, httpresponse_text):
-        self.txt = httpresponse_text
-
+from error import *
 
 class SensorCloudRequests:
     """
@@ -55,7 +51,6 @@ class SensorCloudRequests:
 
         self._cache = cache
 
-
     def authenticate(self):
         from sensorcloud import UserAgent
 
@@ -74,11 +69,17 @@ class SensorCloudRequests:
                       .header("User-Agent", UserAgent)\
                       .get()
 
-
-
         #check the response code for success
         if request.status_code != httplib.OK:
-            raise AuthenticationException(request.text)
+            try:
+                error = ErrorMessage(request)
+            except:
+                raise HTTPError(request, "authenticating")
+
+            if error.code == "401-005":
+                raise QuotaExceededError(error)
+            else:
+                raise AuthenticationError(error)
 
         #Extract the authentication token and server from the response
         unpacker = xdrlib.Unpacker(request.raw)
@@ -89,11 +90,12 @@ class SensorCloudRequests:
             self._cache.server = self._apiServer
 
 
-    class AuthneticatedRequestBuilder(webrequest.Requests.RequestBuilder):
+    class AuthenticatedRequestBuilder(webrequest.Requests.RequestBuilder):
 
         def __init__(self, url, requests):
             webrequest.Requests.RequestBuilder.__init__(self, url)
             self._requests = requests
+            self.scerror = None
 
         def doRequest(self, method, url, options):
             from sensorcloud import UserAgent
@@ -110,26 +112,44 @@ class SensorCloudRequests:
             options.addParam("auth_token", requests.authToken)
             options.addHeader("User-Agent", UserAgent)
 
-            request = webrequest.Requests.RequestBuilder.doRequest(self, method, full_url, options)
+            response = webrequest.Requests.RequestBuilder.doRequest(self, method, full_url, options)
+            response = SensorCloudRequests.Request(response)
 
             #if we get an authentication error, reatuheticate, update the authToken and try to make the request again
-            if request.status_code == httplib.UNAUTHORIZED and Reauthenticate:
+            if response.status_code == httplib.UNAUTHORIZED:
+                if Reauthenticate:
+                    logger.info("Authentication Error, reathenticating...")
+                    requests.authenticate()
 
-                logger.info("Authentication Error, reathenticating...")
-                requests.authenticate()
+                    full_url = requests.apiServer + "/SensorCloud/devices/" + requests.deviceId + url
 
-                full_url = requests.apiServer + "/SensorCloud/devices/" + requests.deviceId + url
+                    options.addParam("auth_token", requests.authToken)
+                    options.addHeader("User-Agent", UserAgent)
 
-                options.addParam("auth_token", requests.authToken)
-                options.addHeader("User-Agent", UserAgent)
+                    response = webrequest.Requests.RequestBuilder.doRequest(self, method, full_url, options)
+                    response = SensorCloudRequests.Request(response)
 
-                request = webrequest.Requests.RequestBuilder.doRequest(self, method, full_url, options)
+                else:
+                    raise error(UnauthorizedError, response)
 
-            return request
+            return response
 
+    class Request:
+        def __init__(self, request):
+            self._r = request
 
+            if request.status_code >= 400:
+                try:
+                    self.scerror = ErrorMessage(self.text)
+                except:
+                    self.scerror = None
 
+        def __getattr__(self, name):
+            try:
+                return self.__getattribute__(name)
+            except:
+                return getattr(self._r, name)
 
     def url(self, url):
         assert url.startswith("/"), "url is a subresorce for a device on sensorcloud and should start with a slash('/')"
-        return SensorCloudRequests.AuthneticatedRequestBuilder(url, self)
+        return SensorCloudRequests.AuthenticatedRequestBuilder(url, self)

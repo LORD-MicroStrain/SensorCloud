@@ -39,19 +39,12 @@ class DoRequest_createChannel:
         """
         if response.status_code == httplib.NOT_FOUND:
 
-            msg = {}
-            try:
-                msg = json.loads(response.text)
-            except:
-                #log the error, but if we couldn't parse the response, we will retry the original request and let it propogate through
-                logger.exception("exception while trying to parse 404 response in the Channel's doRequest override")
-
-            if msg.get("errorcode") == "404-001": #Sensor not found
+            if resposne.scerror and response.scerror.code == "404-001": #Sensor not found
                 logger.info("intercepted '404-001 Sensor Not Found' error and adding the sensor %s", self._channel.sensor.name)
                 self._channel.sensor.device.add_sensor(self._channel.sensor.name)
                 self._channel.sensor.add_channel(self._channel.name)
                 return True
-            elif msg.get("errorcode") == "404-002": #Channel not found
+            elif resposne.scerror and response.scerror.code == "404-002": #Channel not found
                 logger.info("intercepted '404-002 Channel Not Found' error. Creating channel:%s", self._channel.name)
                 self._channel.sensor.add_channel(self._channel.name)
 
@@ -178,9 +171,9 @@ class Channel(object):
 
         #if the channel doesn't have histogram data then we'll get a 404-010 error
         if response.status_code == httplib.NOT_FOUND:
-            error = json.loads(response.text)
-            if error.get("errorcode") == "404-010":
+            if response.scerror and response.scerror.code == "404-010":
                 self._last_histogram = None
+
         #if we don't get a 200 ok then we had an error
         if response.status_code != httplib.OK:
             raise Exception("get histogram info failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
