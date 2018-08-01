@@ -1,5 +1,6 @@
 import unittest
 import xdrlib
+import mock
 from mock import Mock
 
 import sensorcloud
@@ -21,7 +22,7 @@ def authRequest():
 
 class TestUpload(unittest.TestCase):
 
-    def test_gatewayTimeout(self):
+    def test_timeseriesGatewayTimeout(self):
         uploadRequest = Mock()
         uploadRequest.doRequest = Mock()
         uploadRequest.status_code = 504
@@ -35,4 +36,56 @@ class TestUpload(unittest.TestCase):
             sensor = device.sensor("sensor")
             channel = sensor.channel("channel")
             channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
-            
+
+    def test_createAndRetryOn404(self):
+        auth = authRequest()
+
+        sensorNotFound = Mock()
+        sensorNotFound.doRequest = Mock()
+        sensorNotFound.status_code = 404
+        sensorNotFound.text = '{"errorcode": "404-001", "message": ""}'
+
+        created = Mock()
+        created.doRequest = Mock()
+        created.status_code = 201
+
+        request = Mock()
+        request.side_effect = [auth, sensorNotFound, created, created, created]
+        sensorcloud.webrequest.Requests.Request = request
+
+        device = sensorcloud.Device("FAKE", "fake")
+        sensor = device.sensor("sensor")
+        channel = sensor.channel("channel")
+        channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
+
+        calls = [
+                mock.call('POST', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/streams/timeseries/data/', mock.ANY),
+                mock.call('PUT', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/', mock.ANY),
+                mock.call('PUT', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/', mock.ANY),
+                mock.call('POST', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/streams/timeseries/data/', mock.ANY)
+        ]
+        request.assert_has_calls(calls)
+
+    def test_createAndRetryChannel404(self):
+        sensorNotFound = Mock()
+        sensorNotFound.status_code = 404
+        sensorNotFound.text = '{"errorcode": "404-002", "message": ""}'
+
+        created = Mock()
+        created.status_code = 201
+
+        request = Mock()
+        request.side_effect = [authRequest(), sensorNotFound, created, created]
+        sensorcloud.webrequest.Requests.Request = request
+
+        device = sensorcloud.Device("FAKE", "fake")
+        sensor = device.sensor("sensor")
+        channel = sensor.channel("channel")
+        channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
+
+        calls = [
+                mock.call('POST', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/streams/timeseries/data/', mock.ANY),
+                mock.call('PUT', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/', mock.ANY),
+                mock.call('POST', 'https://dsx.sensorcloud.microstrain.com/SensorCloud/devices/FAKE/sensors/sensor/channels/channel/streams/timeseries/data/', mock.ANY)
+        ]
+        request.assert_has_calls(calls)

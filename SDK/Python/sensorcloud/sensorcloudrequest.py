@@ -71,15 +71,8 @@ class SensorCloudRequests:
 
         #check the response code for success
         if request.status_code != httplib.OK:
-            try:
-                error = ErrorMessage(request)
-            except:
-                raise HTTPError(request, "authenticating")
-
-            if error.code == "401-005":
-                raise QuotaExceededError(error)
-            else:
-                raise AuthenticationError(error)
+            response = SensorCloudRequests.Request(request)
+            raise error(response, "authenticating")
 
         #Extract the authentication token and server from the response
         unpacker = xdrlib.Unpacker(request.raw)
@@ -129,18 +122,20 @@ class SensorCloudRequests:
                     response = webrequest.Requests.RequestBuilder.doRequest(self, method, full_url, options)
                     response = SensorCloudRequests.Request(response)
 
-                else:
-                    raise error(UnauthorizedError, response)
-
             return response
 
-    class Request:
+        def _process(self, request, processors):
+            if not isinstance(request, SensorCloudRequests.Request):
+                request = SensorCloudRequests.Request(request)
+            return super(SensorCloudRequests.AuthenticatedRequestBuilder, self)._process(request, processors)
+
+    class Request(object):
         def __init__(self, request):
             self._r = request
 
             if request.status_code >= 400:
                 try:
-                    self.scerror = ErrorMessage(self.text)
+                    self.scerror = ErrorMessage(request)
                 except:
                     self.scerror = None
 

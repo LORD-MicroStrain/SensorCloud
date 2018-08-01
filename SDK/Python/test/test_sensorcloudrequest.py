@@ -28,7 +28,7 @@ class TestAuthentication(unittest.TestCase):
         authRequestMock.text = '{"errorcode": "401-001", "message": ""}'
         sensorcloud.webrequest.Requests.Request = Mock(return_value=authRequestMock)
 
-        with self.assertRaises(sensorcloud.AuthenticationError):
+        with self.assertRaises(sensorcloud.UnauthorizedError):
             device = sensorcloud.Device("FAKE", "fake")
             device._requests.authenticate()
 

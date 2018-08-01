@@ -18,7 +18,12 @@ class Error(Exception):
 
 class HTTPError(Error):
     def __init__(self, response, message):
-        super(HTTPError, self).__init__("HTTP Error %s %s %s: %s" % (message, response.status_code, response.reason, response.text))
+        if response.scerror:
+            super(HTTPError, self).__init__("SensorCloud Error %s %s %s" % (message, response.scerror.code, response.scerror.message))
+            self.error = response.scerror
+        else:
+            super(HTTPError, self).__init__("SensorCloud Error %s %s %s: %s" % (message, response.status_code, response.reason, response.text))
+            self.error = None
         self.code = response.status_code
         self.reason = response.reason
 
@@ -26,25 +31,21 @@ class ServerError(HTTPError):
     def __init__(self, response, message):
         super(ServerError, self).__init__(response, message)
 
-class BodyError(Error):
-    def __init__(self, error, message):
-        super(BodyError, self).__init__("SensorCloud Error %s %s %s" % (message, error.code, error.message))
-        self.error = error
+class UnauthorizedError(HTTPError):
+    def __init__(self, response, message):
+        super(UnauthorizedError, self).__init__(response, message)
 
-class UnauthorizedError(BodyError):
-    def __init__(self, error, message):
-        super(UnauthorizedError, self).__init__(error, message)
+class QuotaExceededError(UnauthorizedError):
+    def __init__(self, response, message):
+        super(QuotaExceededError, self).__init__(response, message)
 
-class AuthenticationError(BodyError):
-    def __init__(self, error):
-        super(AuthenticationError, self).__init__(error, "authenticating")
-
-class QuotaExceededError(AuthenticationError):
-    def __init__(self, error):
-        super(QuotaExceededError, self).__init__(error)
-
-def error(makeBodyError, response, message):
-    if BodyErrorClass and response.scerror:
-        return makeBodyError()
-    else:
-        return HTTPError(response, message)
+def error(response, message):
+    if response.scerror:
+        if response.status_code == 401:
+            if response.scerror.code == "401-005":
+                return QuotaExceededError(response, message)
+    if response.status_code >= 500:
+        return ServerError(response, message)
+    if response.status_code == 401:
+        return UnauthorizedError(response, message)
+    return HTTPError(response, message)

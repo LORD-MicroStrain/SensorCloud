@@ -17,6 +17,7 @@ from util import nanosecond_to_timestamp as to_ts
 from timeseries import TimeSeriesStream
 from point import Point
 from histogram import Histogram
+from error import *
 
 HistogramStreamInfo = namedtuple("HistogramStreamInfo", ["start_time", "end_time"])
 TimeSeriesStreamInfo = namedtuple("TimeSeriesStreamInfo", ["start_time", "end_time", "units"])
@@ -39,12 +40,15 @@ class DoRequest_createChannel:
         """
         if response.status_code == httplib.NOT_FOUND:
 
-            if resposne.scerror and response.scerror.code == "404-001": #Sensor not found
+            print "here, " + str(response)
+
+            if response.scerror and response.scerror.code == "404-001": #Sensor not found
+                print "creating sensor/channel"
                 logger.info("intercepted '404-001 Sensor Not Found' error and adding the sensor %s", self._channel.sensor.name)
                 self._channel.sensor.device.add_sensor(self._channel.sensor.name)
                 self._channel.sensor.add_channel(self._channel.name)
                 return True
-            elif resposne.scerror and response.scerror.code == "404-002": #Channel not found
+            elif response.scerror and response.scerror.code == "404-002": #Channel not found
                 logger.info("intercepted '404-002 Channel Not Found' error. Creating channel:%s", self._channel.name)
                 self._channel.sensor.add_channel(self._channel.name)
 
@@ -406,6 +410,9 @@ class Channel(object):
                                  .content_type("application/xdr")\
                                  .data(data)\
                                  .post()
+
+        if response.status_code == httplib.GATEWAY_TIMEOUT:
+            raise ServerError(response, "timeseries upload")
 
         # if response is 201 created then we know the data was successfully added
         if response.status_code != httplib.CREATED:
