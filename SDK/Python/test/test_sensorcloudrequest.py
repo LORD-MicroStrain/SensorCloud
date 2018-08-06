@@ -4,9 +4,12 @@
 
 import unittest
 import xdrlib
+import mock
 from mock import Mock
 
 import sensorcloud
+
+from helpers import authRequest
 
 class TestAuthentication(unittest.TestCase):
 
@@ -50,6 +53,21 @@ class TestAuthentication(unittest.TestCase):
         device._requests.authenticate()
         self.assertEqual(device._requests._authToken, token)
         self.assertEqual(device._requests._apiServer, "https://" + server)
+
+    def test_reauthentication(self):
+        unauthorized = Mock()
+        unauthorized.status_code = 401
+
+        ok = Mock()
+        ok.status_code = 200
+
+        request = Mock()
+        request.side_effect = [authRequest(), unauthorized, authRequest(), ok]
+        sensorcloud.webrequest.Requests.Request = request
+
+        device = sensorcloud.Device("FAKE", "fake")
+        response = device.url("/fake/").get()
+        self.assertEqual(response.status_code, 200)
 
 if __name__ == "__main__":
     unittest.main()

@@ -41,9 +41,7 @@ class TimeSeriesStream(object):
             #it must be an int
             self._endTimestampNanoseconds = int(end)
 
-
         assert(end >= start)
-
 
     @property
     def startTimestampNanoseconds(self):
@@ -83,13 +81,8 @@ class TimeSeriesStream(object):
             else:
                 break
 
-
-
-
     def range(self, start, end):
-
         return TimeSeriesStream(self._channel, start, end, self._samplerate, self._convertToUnits)
-
 
     def _downloadData(self, start, end):
         start = int(start)

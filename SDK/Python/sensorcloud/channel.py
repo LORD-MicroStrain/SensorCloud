@@ -411,12 +411,9 @@ class Channel(object):
                                  .data(data)\
                                  .post()
 
-        if response.status_code == httplib.GATEWAY_TIMEOUT:
-            raise ServerError(response, "timeseries upload")
-
         # if response is 201 created then we know the data was successfully added
         if response.status_code != httplib.CREATED:
-            raise Exception("add timeseries data failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "timeseries upload")
 
     def histogram_append(self, samplerate, data):
         """
@@ -526,5 +523,5 @@ class Channel(object):
 
         # if response is 201 created then we know the data was successfully added
         if response.status_code != httplib.CREATED:
-            raise Exception("add histogram data failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "histogram upload")
 

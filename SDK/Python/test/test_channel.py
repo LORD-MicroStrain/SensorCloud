@@ -23,6 +23,53 @@ class TestUpload(unittest.TestCase):
             channel = sensor.channel("channel")
             channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
 
+    def test_timeseriesConflict(self):
+        uploadRequest = Mock()
+        uploadRequest.doRequest = Mock()
+        uploadRequest.status_code = 409
+        uploadRequest.reason = ""
+        uploadRequest.text = '{"errorcode": "409-001", "message": ""}'
+        sensorcloud.webrequest.Requests.Request = Mock()
+        sensorcloud.webrequest.Requests.Request.side_effect = [authRequest(), uploadRequest]
+
+        with self.assertRaises(sensorcloud.UserError):
+            device = sensorcloud.Device("FAKE", "fake")
+            sensor = device.sensor("sensor")
+            channel = sensor.channel("channel")
+            channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
+
+    def test_histogramGatewayTimeout(self):
+        uploadRequest = Mock()
+        uploadRequest.doRequest = Mock()
+        uploadRequest.status_code = 504
+        uploadRequest.reason = ""
+        uploadRequest.text = "text"
+        sensorcloud.webrequest.Requests.Request = Mock()
+        sensorcloud.webrequest.Requests.Request.side_effect = [authRequest(), uploadRequest]
+
+        with self.assertRaises(sensorcloud.ServerError):
+            device = sensorcloud.Device("FAKE", "fake")
+            sensor = device.sensor("sensor")
+            channel = sensor.channel("channel")
+            data = [sensorcloud.Histogram(1234, 0, 1, [10.5])]
+            channel.histogram_append(sensorcloud.SampleRate.hertz(10), data)
+
+    def test_histogramConflict(self):
+        uploadRequest = Mock()
+        uploadRequest.doRequest = Mock()
+        uploadRequest.status_code = 409
+        uploadRequest.reason = ""
+        uploadRequest.text = '{"errorcode": "409-001", "message": ""}'
+        sensorcloud.webrequest.Requests.Request = Mock()
+        sensorcloud.webrequest.Requests.Request.side_effect = [authRequest(), uploadRequest]
+
+        with self.assertRaises(sensorcloud.UserError):
+            device = sensorcloud.Device("FAKE", "fake")
+            sensor = device.sensor("sensor")
+            channel = sensor.channel("channel")
+            data = [sensorcloud.Histogram(1234, 0, 1, [10.5])]
+            channel.histogram_append(sensorcloud.SampleRate.hertz(10), data)
+
     def test_createAndRetryOn404(self):
         sensorNotFound = Mock()
         sensorNotFound.status_code = 404

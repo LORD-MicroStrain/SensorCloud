@@ -9,6 +9,7 @@ import sys
 from samplerate import SampleRate
 from device import Device
 from point import Point
+from histogram import Histogram
 from error import *
 
 __version__ = '0.3.0'
