@@ -180,7 +180,7 @@ class Channel(object):
 
         #if we don't get a 200 ok then we had an error
         if response.status_code != httplib.OK:
-            raise Exception("get histogram info failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "get histogram info")
 
         #packer for the units xdr format
         unpacker = xdrlib.Unpacker(response.raw)
@@ -245,7 +245,7 @@ class Channel(object):
                 return None
         #if we don't get a 200 ok then we had an error
         if response.status_code != httplib.OK:
-            raise Exception("get histogram info failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "get histogram info")
 
 
         #packer for the units xdr format
@@ -296,7 +296,7 @@ class Channel(object):
                 return None
         #if we don't get a 200 ok then we had an error
         if response.status_code != httplib.OK:
-            raise Exception("get timeseries info failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "get timeseries info")
 
 
         #packer for the units xdr format
@@ -310,7 +310,7 @@ class Channel(object):
 
         unit_count = unpacker.unpack_uint()
         if not 0<= unit_count <= 100:
-            raise Exception("Invalid timeseres stream info structure. unit count not in the range [0,100]. value:%s"%unit_count)
+            raise Error("Invalid timeseres stream info structure. unit count not in the range [0,100]. value:%s"%unit_count)
 
         units = []
         for i in range(0,unit_count):
@@ -454,7 +454,7 @@ class Channel(object):
             if histogram.bin_start != bin_start or\
                     histogram.bin_size != bin_size or\
                     len(histogram.bins) != num_bins:
-                raise Exception("All histograms must have same bin start, bin size, and number of bins")
+                raise Error("All histograms must have same bin start, bin size, and number of bins")
             packer.pack_uhyper(histogram.timestamp_nanoseconds)
             for bin_value in histogram.bins:
                 packer.pack_uint(bin_value)

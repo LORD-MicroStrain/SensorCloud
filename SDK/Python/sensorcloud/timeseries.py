@@ -9,6 +9,7 @@ import warnings
 
 from util import nanosecond_to_timestamp, timestamp_to_nanosecond
 from point import Point
+from error import *
 
 class TimeSeriesStream(object):
 
@@ -109,7 +110,7 @@ class TimeSeriesStream(object):
 
         elif response.status_code != httplib.OK:
             #all other errors are exceptions
-            raise Exception("AddTimeSeriesData failed.")
+            raise error(response, "download timeseris data")
 
 
         #packer for the units xdr format

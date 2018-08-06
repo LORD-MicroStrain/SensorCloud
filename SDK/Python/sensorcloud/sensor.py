@@ -99,7 +99,7 @@ class Sensor(object):
         if response.status_code == httplib.OK: return True
         if response.status_code == httplib.NOT_FOUND: return False
 
-        raise Exception("has_channel failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+        raise error(response, "channel contains")
 
 
     def channel(self, channel_name):
@@ -129,7 +129,7 @@ class Sensor(object):
 
         #if response is 201 created then we know the sensor was added
         if response.status_code != httplib.CREATED:
-            raise Exception("add channel failed. status: %s %s  message:%s"%(response.status_code , response.reason, response.text))
+            raise error(response, "add channel")
 
         return self.channel(channel_name)
 
