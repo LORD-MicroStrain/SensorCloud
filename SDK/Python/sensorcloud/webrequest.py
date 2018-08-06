@@ -20,8 +20,11 @@ log = logging.getLogger(__name__)
 #from urllib import urlencode
 #import httplib
 import time
+import zlib
 
 class Requests(object):
+
+    compression = "gzip"
 
     class RequestOptions(object):
         """
@@ -103,17 +106,12 @@ class Requests(object):
             """
             return self.header("Accept", acceptType);
 
-
-
-
         def param(self, name, value):
             """
             Add a query parameter to the request
             """
             self._options.addParam(name, str(value))
             return self
-
-
 
         def data(self, requestBody):
             """
@@ -227,6 +225,10 @@ class Requests(object):
             self._response_data = None;
             self._response_headers = None;
             self._duration = None
+
+            if self._options.requestBody and Requests.compression == "gzip":
+                self._options.setRequestBody(zlib.compress(self._options.requestBody))
+                self._options.addHeader('content-encoding', "gzip")
 
             self.doRequest()
             log.debug("%s: %s %s s:%0.2f", self._method, self._url, self.status_code, self._duration)

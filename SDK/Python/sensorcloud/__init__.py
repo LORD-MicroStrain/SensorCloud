@@ -12,7 +12,7 @@ from point import Point
 from histogram import Histogram
 from error import *
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 # True to reauthenticate on token expiration, false otherwise
 Reauthenticate = True
