@@ -227,8 +227,10 @@ class Requests(object):
             self._duration = None
 
             if self._options.requestBody and Requests.compression == "gzip":
-                self._options.setRequestBody(zlib.compress(self._options.requestBody))
-                self._options.addHeader('content-encoding', "gzip")
+                compressedBody = zlib.compress(self._options.requestBody)
+                if len(compressedBody) < len(self._options.requestBody):
+                    self._options.setRequestBody(compressedBody)
+                    self._options.addHeader('content-encoding', "gzip")
 
             self.doRequest()
             log.debug("%s: %s %s s:%0.2f", self._method, self._url, self.status_code, self._duration)
