@@ -10,6 +10,9 @@ from datetime import datetime
 NANOSECONDS_PER_SECOND = 1000000000
 UNIX_EPOCH = datetime(1970, 1, 1)
 
+def descriptor(sample_rate, bin_start, bin_size, num_bins):
+    return "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
+
 class Histogram(object):
     """
     Point represents a datapoint as a timestamp and value in a timeseries dataset.
@@ -56,6 +59,9 @@ class Histogram(object):
     @property
     def bins(self):
         return self._bins
+
+    def descriptor(self, sample_rate):
+        return descriptor(sample_rate, self.bin_start, self.bin_size, len(self.bins))
 
     def __repr__(self):
         return "Histogram(Bin Start:%s,Bin Size:%s, %s, %s)"%(self.bin_start, self.bin_size, self.timestamp, self.bins)

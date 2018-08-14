@@ -35,7 +35,6 @@ class SampleRate(object):
         else:
             return timedelta(seconds=self._rate)
 
-
     @classmethod
     def hertz(cls, rate):
         return SampleRate(HERTZ, rate)

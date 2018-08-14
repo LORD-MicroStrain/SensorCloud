@@ -11,6 +11,9 @@ from util import nanosecond_to_timestamp, timestamp_to_nanosecond
 from point import Point
 from error import *
 
+def descriptor(sample_rate):
+    return str(sample_rate)
+
 class TimeSeriesStream(object):
 
     def __init__(self, channel, start=None, end=None, samplerate=None, convertToUnits=True):

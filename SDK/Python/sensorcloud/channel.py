@@ -14,9 +14,12 @@ import json
 from collections import namedtuple
 
 from util import nanosecond_to_timestamp as to_ts
+import timeseries
 from timeseries import TimeSeriesStream
 from point import Point
+import histogram
 from histogram import Histogram
+from samplerate import SampleRate
 from error import *
 
 HistogramStreamInfo = namedtuple("HistogramStreamInfo", ["start_time", "end_time"])
@@ -69,15 +72,10 @@ class Channel(object):
         self._timeseriesInfo = None
         self._histogramInfo = None
 
-        self._last_timestamp_nanoseconds = None
-        self._last_timestamp_timeseries = None
-        self._last_timestamp_histogram = None
+        self._timeseries_partitions = None
+        self._histogram_partitions = None
 
         self._cache = cache
-        if self._cache:
-            self._last_timestamp_nanoseconds = self._cache.last_timestamp
-            self._last_timestamp_timeseries = self._cache.last_timestamp_timeseries
-            self._last_timestamp_histogram = self._cache.last_timestamp_histogram
 
     @property
     def sensor(self):
@@ -86,7 +84,6 @@ class Channel(object):
     @property
     def name(self):
         return self._channel_name
-
 
     @property
     def last_point(self):
@@ -115,16 +112,39 @@ class Channel(object):
         """
         get the timestamp for the last point stored for this channel as the number of nanoseconds since 1970
         """
-        if not self._last_timestamp_nanoseconds:
-            self._update_timeseries_info()
-            self._update_histogram_info()
+        return max((self.last_timeseries_timestamp(), self.last_histogram_timestamp()))
 
-            if self._last_timestamp_timeseries > self._last_timestamp_histogram:
-                self._last_timestamp_nanoseconds = self._last_timestamp_timeseries
-            else:
-                self._last_timestamp_nanoseconds = self._last_timestamp_histogram
+    def last_timeseries_timestamp(self, sample_rate = None):
+        """
+        Get the timestamp for the last point stored for this channel with the given sample rate in nanoseconds since 1970
+        """
+        def filter_fn(partition):
+            if sample_rate:
+                return sample_rate == partition['sample_rate']
+            return True
 
-        return self._last_timestamp_nanoseconds
+        parts = filter(filter_fn, self._get_timeseries_partitions().values())
+        if parts:
+            return max([p['end_time'] for p in parts])
+        return 0
+
+    def last_histogram_timestamp(self, sample_rate = None, bin_start = None, bin_size = None, num_bins = None):
+        """
+        Get the timestamp for the last histogram stored for this channel with the given sample rate and histogram parameters in nanoseconds since 1970
+        """
+        def compare_floats(a, b):
+            return ("%6e" % a) == ("%6e" % b)
+
+        def filter_fn(partition):
+            ret = sample_rate == partition['sample_rate'] if sample_rate is not None else True
+            ret = ret and (compare_floats(bin_start, partition['bin_start']) if bin_start is not None else True)
+            ret = ret and (compare_floats(bin_size, partition['bin_size']) if bin_size is not None else True)
+            return ret and (num_bins == partition['num_bins'] if num_bins is not None else True)
+
+        parts = filter(filter_fn, self._get_histogram_partitions().values())
+        if parts:
+            return max([p['end_time'] for p in parts])
+        return 0
 
     def url(self, url_path):
         """
@@ -155,10 +175,10 @@ class Channel(object):
         called internally to get an updated copy of the last datapoint from the server.
         """
 
-        if self._last_timestamp_nanoseconds is None:
+        if self.last_timestamp_nanoseconds is None:
             self._last_point = None
         else:
-            points = list(self.timeseries_data(start=self._last_timestamp_nanoseconds, end=self._last_timestamp_nanoseconds))
+            points = list(self.timeseries_data(start=self.last_timestamp_nanoseconds, end=self.last_timestamp_nanoseconds))
             if points:
                 self._last_point = points[-1]
             else:
@@ -201,34 +221,11 @@ class Channel(object):
 
         self._last_histogram = Histogram(timestamp, bin_start, bin_size, binData)
 
-        #check if we need to update last histogram time
-        if self._last_histogram.timestamp_nanoseconds > self._last_timestamp_histogram:
-            self._last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
-            if self._cache:
-                self._cache.last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
-        if self._last_histogram.timestamp_nanoseconds > self._last_timestamp_nanoseconds:
-            self._last_timestamp_nanoseconds = self._last_histogram.timestamp_nanoseconds
-
     def _update_histogram_info(self):
         """
         called internally to update info about the stream from the server
         """
         self._histogramInfo = self._get_histogram_info()
-
-
-        if self._histogramInfo:
-            self._last_timestamp_histogram = self._histogramInfo.end_time
-        else:
-            self._last_timestamp_histogram = None
-
-        if self._cache:
-            if self._last_timestamp_histogram is not None:
-                self._cache.last_timestamp_histogram = self._last_timestamp_histogram
-
-        #When we update timeseries info, verify our last point cache is valid, if it's not invalidate it
-        if self._last_histogram:
-            if self._last_histogram.timestamp != self._last_timestamp_histogram:
-                self._last_histogram = None
 
     def _get_histogram_info(self):
         """ get a histogram start and end from SensorCloud"""
@@ -265,21 +262,6 @@ class Channel(object):
         called internally to update info about the stream from the server
         """
         self._timeseriesInfo = self._get_timeseries_info()
-
-
-        if self._timeseriesInfo:
-            self._last_timestamp_timeseries = self._timeseriesInfo.end_time
-        else:
-            self._last_timestamp_timeseries = None
-
-        if self._cache:
-            if self._last_timestamp_timeseries is not None:
-                self._cache.last_timestamp_timeseries = self._last_timestamp_timeseries
-
-        #When we update timeseries info, verify our last point cache is valid, if it's not invalidate it
-        if self._last_point:
-            if self._last_point.timestamp != self._last_timestamp_timeseries:
-                self._last_point = None
 
     def _get_timeseries_info(self):
         """ get a timeseries start, end and unit info from SensorCloud"""
@@ -342,7 +324,7 @@ class Channel(object):
         #server allows a maximum upload size of 100,000 (as of 3-12-2013) we're limitting upload size to 20,000 points
         MAX_UPLOAD_SIZE = 20000
 
-        #split the data into MAX_UPLOAD_SIZE chunchs to upload to sensorcloud
+        #split the data into MAX_UPLOAD_SIZE chunks to upload to sensorcloud
         s = 0
         e = MAX_UPLOAD_SIZE
         while s < len(data):
@@ -350,7 +332,7 @@ class Channel(object):
             s = e
             e = e + MAX_UPLOAD_SIZE
 
-    def _timeseries_append_chunk(self, samplerate, data):
+    def _timeseries_append_chunk(self, sample_rate, data):
 
         logger.debug("calling  _timeseries_append_chunk. points:%s", len(data))
 
@@ -364,34 +346,20 @@ class Channel(object):
             packer.pack_uhyper(point.timestamp_nanoseconds)
             packer.pack_float(point.value)
 
-        #we are about to update the timeseries stream, if the request fails, we won't    so we don't know if it is going to be updated
-        self._last_point = None
-        self._last_timestamp_nanoseconds = None
+        self._timeseries_submit_blob(sample_rate, packer.get_buffer())
 
-        self._timeseries_submit_blob(samplerate, packer.get_buffer())
+        self._new_timeseries(sample_rate, data[-1])
 
-        #at this point we know that the upload was successful so we can update the last point
-        self._last_point = data[-1]
-        self._last_timestamp_nanoseconds = self._last_point.timestamp_nanoseconds
-        if self._cache:
-            self._cache.last_timestamp_timeseries = self._last_timestamp_nanoseconds
-
-    def timeseries_append_blob(self, sampleRate, blob):
+    def timeseries_append_blob(self, sample_rate, blob):
         assert(len(blob) % 12 == 0)
 
         if len(blob) == 0:
             return
 
-        self._last_point = None
-        self._last_timestamp_nanoseconds = None
-
-        self._timeseries_submit_blob(sampleRate, blob)
+        self._timeseries_submit_blob(sample_rate, blob)
 
         unpacker = xdrlib.Unpacker(blob[-12:])
-        self._last_point = Point(unpacker.unpack_uhyper(), unpacker.unpack_float())
-        self._last_timestamp_nanoseconds = self._last_point.timestamp_nanoseconds
-        if self._cache:
-            self._cache.last_timestamp_timeseries = self._last_timestamp_nanoseconds
+        self._new_timeseries(sample_rate, Point(unpacker.unpack_uhyper(), unpacker.unpack_float()))
 
     def _timeseries_submit_blob(self, sampleRate, blob):
         pointCount = len(blob) / 12
@@ -414,6 +382,19 @@ class Channel(object):
         # if response is 201 created then we know the data was successfully added
         if response.status_code != httplib.CREATED:
             raise error(response, "timeseries upload")
+        
+    def _new_timeseries(self, sample_rate, point):
+        self._last_point = point
+        descriptor = timeseries.descriptor(sample_rate)
+        if self._timeseries_partitions is None:
+            self._timeseries_partitions = {}
+        if not descriptor in self._timeseries_partitions:
+            self._timeseries_partitions[descriptor] = {'end_time': point.timestamp_nanoseconds}
+        else:
+            self._timeseries_partitions[descriptor]['end_time'] = point.timestamp_nanoseconds
+
+        if self._cache:
+            self._cache.timeseries_partition(sample_rate).last_timestamp = point.timestamp_nanoseconds
 
     def histogram_append(self, samplerate, data):
         """
@@ -426,7 +407,7 @@ class Channel(object):
         #server allows a maximum upload size of 100,000 (as of 3-12-2013) we're limitting upload size to 20,000 points
         MAX_UPLOAD_SIZE = 20000
 
-        #split the data into MAX_UPLOAD_SIZE chunchs to upload to sensorcloud
+        #split the data into MAX_UPLOAD_SIZE chuncks to upload to sensorcloud
         s = 0
         e = MAX_UPLOAD_SIZE
         while s < len(data):
@@ -434,7 +415,7 @@ class Channel(object):
             s = e
             e = e + MAX_UPLOAD_SIZE
 
-    def _histogram_append_chunk(self, samplerate, data):
+    def _histogram_append_chunk(self, sample_rate, data):
 
         logger.debug("calling  _histogram_append_chunk. points:%s", len(data))
 
@@ -459,43 +440,40 @@ class Channel(object):
             for bin_value in histogram.bins:
                 packer.pack_uint(bin_value)
 
-        #we are about to update the timeseries stream, if the request fails, we won't    so we don't know if it is going to be updated
-        self._last_histogram = None
-        self._last_timestamp_histogram = None
-        self._last_timestamp_nanoseconds = None
+        self._histogram_submit_blob(sample_rate, bin_start, bin_size, num_bins, packer.get_buffer())
 
-        self._histogram_submit_blob(samplerate, bin_start, bin_size, num_bins, packer.get_buffer())
+        self._new_histogram(sample_rate, data[-1])
 
-        #at this point we know that the upload was successful so we can update the last point
-        self._last_histogram = data[-1]
-        self._last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
-        self._last_timestamp_nanoseconds = self._last_histogram.timestamp_nanoseconds
-        if self._cache:
-            self._cache.last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
-
-    def histogram_append_blob(self, sampleRate, bin_start, bin_size, num_bins, blob):
+    def histogram_append_blob(self, sample_rate, bin_start, bin_size, num_bins, blob):
         hist_size = 8 + (4 * num_bins)
         assert(len(blob) % hist_size == 0)
 
         if len(blob) == 0:
             return
 
-        self._last_histogram = None
-        self._last_timestamp_histogram = None
-        self._last_timestamp_nanoseconds = None
-
-        self._histogram_submit_blob(sampleRate, bin_start, bin_size, num_bins, blob)
+        self._histogram_submit_blob(sample_rate, bin_start, bin_size, num_bins, blob)
 
         unpacker = xdrlib.Unpacker(blob[-hist_size:])
         timestamp = unpacker.unpack_uhyper()
         bins = []
         for i in xrange(num_bins):
             bins.append(unpacker.unpack_uint())
-        self._last_histogram = Histogram(timestamp, bin_start, bin_size, bins)
-        self._last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
-        self._last_timestamp_nanoseconds = self._last_histogram.timestamp_nanoseconds
+        self._new_histogram(sample_rate, Histogram(timestamp, bin_start, bin_size, bins))
+
+    def _new_histogram(self, sample_rate, histogram):
+        self._last_histogram = histogram
+        descriptor = histogram.descriptor(sample_rate)
+        if self._histogram_partitions is None:
+            self._histogram_partitions = {}
+        if not descriptor in self._histogram_partitions:
+            self._histogram_partitions[descriptor] = {'end_time': histogram.timestamp_nanoseconds}
+        else:
+            self._histogram_partitions[descriptor]['end_time'] = histogram.timestamp_nanoseconds
+        bin_start = histogram.bin_start
+        bin_size = histogram.bin_size
+        num_bins = len(histogram.bins)
         if self._cache:
-            self._cache.last_timestamp_histogram = self._last_histogram.timestamp_nanoseconds
+            self._cache.histogram_partition(sample_rate, bin_start, bin_size, num_bins).last_timestamp = histogram.timestamp_nanoseconds
 
     def _histogram_submit_blob(self, sampleRate, bin_start, bin_size, num_bins, blob):
         hist_size = 8 + (4 * num_bins)
@@ -525,3 +503,68 @@ class Channel(object):
         if response.status_code != httplib.CREATED:
             raise error(response, "histogram upload")
 
+    def _retrieve_timeseries_partitions(self):
+        
+        def unpackPartition(unpacker):
+            partition = {}
+            partition['start_time'] = unpacker.unpack_uhyper()
+            partition['end_time'] = unpacker.unpack_uhyper()
+            unpacker.unpack_int()
+            unpacker.unpack_int()
+            sampleRateType = unpacker.unpack_uint()
+            partition['sample_rate'] = SampleRate.hertz(unpacker.unpack_uint()) if sampleRateType == 1 else \
+                SampleRate.seconds(unpacker.unpack_uint())
+            for _ in range(unpacker.unpack_uint()):
+                popSize = unpacker.unpack_uint() * 12
+                unpacker.unpack_fopaque(popSize)
+
+            return timeseries.descriptor(partition['sample_rate']), partition
+
+        response = self.url("/streams/timeseries/partitions/").param("version", "1").get()
+        if response.status_code != httplib.OK:
+            raise error(response, "get timeseries partitions")
+
+        partitions = []
+        unpacker = xdrlib.Unpacker(response.raw)
+        unpacker.unpack_int()
+        return dict([unpackPartition(unpacker) for _ in range(unpacker.unpack_uint())])
+
+    def _get_timeseries_partitions(self):
+        if self._timeseries_partitions is None:
+            self._timeseries_partitions = self._retrieve_timeseries_partitions()
+        if self._cache:
+            for part in self._timeseries_partitions.values():
+                self._cache.timeseries_partition(part['sample_rate']).last_timestamp = part['end_time']
+        return self._timeseries_partitions
+
+    def _retrieve_histogram_partitions(self):
+
+        def unpackPartition(unpacker):
+            partition = {}
+            partition['start_time'] = unpacker.unpack_uhyper()
+            partition['end_time'] = unpacker.unpack_uhyper()
+            unpacker.unpack_int()
+            unpacker.unpack_int()
+            sampleRateType = unpacker.unpack_uint()
+            partition['sample_rate'] = SampleRate.hertz(unpacker.unpack_uint()) if sampleRateType == 1 else \
+                SampleRate.seconds(unpacker.unpack_uint())
+            partition['num_bins'] = unpacker.unpack_uint()
+            partition['bin_start'] = unpacker.unpack_float()
+            partition['bin_size'] = unpacker.unpack_float()
+            return histogram.descriptor(partition['sample_rate'], partition['bin_start'], partition['bin_size'], partition['num_bins']), partition
+
+        response = self.url("/streams/histogram/partitions/").param("version", "1").get()
+        if response.status_code != httplib.OK:
+            raise error(response, "get histogram partitions")
+
+        unpacker = xdrlib.Unpacker(response.raw)
+        unpacker.unpack_int() # version
+        return dict([unpackPartition(unpacker) for _ in range(unpacker.unpack_uint())])
+
+    def _get_histogram_partitions(self):
+        if self._histogram_partitions is None:
+            self._histogram_partitions = self._retrieve_histogram_partitions()
+        if self._cache:
+            for part in self._histogram_partitions.values():
+                self._cache.histogram_partition(part['sample_rate'], part['bin_start'], part['bin_size'], part['num_bins']).last_timestamp = part['end_time']
+        return self._histogram_partitions

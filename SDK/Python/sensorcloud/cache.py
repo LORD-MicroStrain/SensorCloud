@@ -6,6 +6,27 @@ Created on Nov 13, 2014
 
 import json
 
+class Partition(object):
+    @property
+    def descriptor(self):
+        return self._descriptor
+
+    @property
+    def last_timestamp(self):
+        return self._attributes.get('last_timestamp')
+
+    @last_timestamp.setter
+    def last_timestamp(self, value):
+        self._attributes['last_timestamp'] = long(value)
+
+    def save(self):
+        self._cache.save()
+
+    def __init__(self, cache, descriptor, attributes):
+        self._cache = cache
+        self._descriptor = descriptor
+        self._attributes = attributes
+
 class ChannelCache(object):
 
     @property
@@ -13,38 +34,29 @@ class ChannelCache(object):
         return self._name
 
     @property
-    def last_timestamp(self):
-        if self.last_timestamp_timeseries > self.last_timestamp_histogram:
-            return self.last_timestamp_timeseries
-        return self.last_timestamp_histogram
+    def partitions(self):
+        return [Partition(self._cache, descriptor, attributes) for descriptor, attributes in self._partitions.items()]
 
-    @property
-    def last_timestamp_timeseries(self):
-        if "last_timestamp_timeseries" in self._attributes:
-            return self._attributes["last_timestamp_timeseries"]
-        return None
+    def timeseries_partition(self, sample_rate):
+        descriptor = str(sample_rate)
+        return self._partition(descriptor)
 
-    @last_timestamp_timeseries.setter
-    def last_timestamp_timeseries(self, value):
-        self._attributes["last_timestamp_timeseries"] = long(value)
-
-    @property
-    def last_timestamp_histogram(self):
-        if "last_timestamp_histogram" in self._attributes:
-            return self._attributes["last_timestamp_histogram"]
-        return None
-
-    @last_timestamp_histogram.setter
-    def last_timestamp_histogram(self, value):
-        self._attributes["last_timestamp_histogram"] = long(value)
+    def histogram_partition(self, sample_rate, bin_start, bin_size, num_bins):
+        descriptor = "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
+        return self._partition(descriptor)
 
     def save(self):
         self._cache.save()
 
-    def __init__(self, cache, name, attributes):
+    def __init__(self, cache, name, partitions):
         self._cache = cache
         self._name = name
-        self._attributes = attributes
+        self._partitions = partitions
+
+    def _partition(self, descriptor):
+        if descriptor not in self._partitions:
+            self._partitions[descriptor] = {}
+        return Partition(self._cache, descriptor, self._partitions[descriptor])
 
 class SensorCache(object):
 

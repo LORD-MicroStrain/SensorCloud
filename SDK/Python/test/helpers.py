@@ -13,3 +13,13 @@ def authRequest():
     authRequestMock.status_code = 200
     authRequestMock.raw = packer.get_buffer()
     return authRequestMock
+
+def ok():
+    response = Mock()
+    response.status_code = 200
+    return response
+
+def created():
+    response = Mock()
+    response.status_code = 201
+    return response
