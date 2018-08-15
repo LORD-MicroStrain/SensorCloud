@@ -39,13 +39,13 @@ class UnauthorizedError(UserError):
     def __init__(self, response, message):
         super(UnauthorizedError, self).__init__(response, message)
 
-class TruncatedUploadError(UserError):
-    def __init__(self, response, message):
-        super(TruncatedUploadError, self).__init__(response, message)
-
 class QuotaExceededError(UnauthorizedError):
     def __init__(self, response, message):
         super(QuotaExceededError, self).__init__(response, message)
+
+class TruncatedUploadError(UserError):
+    def __init__(self, response, message):
+        super(TruncatedUploadError, self).__init__(response, message)
 
 def error(response, message):
     # setup specific errors
