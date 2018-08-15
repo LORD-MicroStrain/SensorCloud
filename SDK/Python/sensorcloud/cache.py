@@ -41,9 +41,17 @@ class ChannelCache(object):
         descriptor = str(sample_rate)
         return self._partition(descriptor)
 
+    def delete_timeseries_partition(self, sample_rate):
+        descriptor = str(sample_rate)
+        del self._partitions[descriptor]
+
     def histogram_partition(self, sample_rate, bin_start, bin_size, num_bins):
         descriptor = "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
         return self._partition(descriptor)
+
+    def delete_histogram_partition(self, sample_rate, bin_start, bin_size, num_bins):
+        descriptor = "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
+        del self._partitions[descriptor]
 
     def save(self):
         self._cache.save()

@@ -74,6 +74,21 @@ class TestUpload(unittest.TestCase):
             data = [sensorcloud.Histogram(1234, 0, 1, [10.5])]
             channel.histogram_append(sensorcloud.SampleRate.hertz(10), data)
 
+    def test_truncatedUpload(self):
+        uploadRequest = Mock()
+        uploadRequest.doRequest = Mock()
+        uploadRequest.status_code = 400
+        uploadRequest.reason = ""
+        uploadRequest.text = '{"errorcode": "400-038", "message": ""}'
+        sensorcloud.webrequest.Requests.Request = Mock()
+        sensorcloud.webrequest.Requests.Request.side_effect = [authRequest(), uploadRequest]
+
+        with self.assertRaises(sensorcloud.TruncatedUploadError):
+            device = sensorcloud.Device("FAKE", "fake")
+            sensor = device.sensor("sensor")
+            channel = sensor.channel("channel")
+            channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
+
     def test_createAndRetryOn404(self):
         sensorNotFound = Mock()
         sensorNotFound.status_code = 404

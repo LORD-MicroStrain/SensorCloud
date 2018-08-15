@@ -39,6 +39,10 @@ class UnauthorizedError(UserError):
     def __init__(self, response, message):
         super(UnauthorizedError, self).__init__(response, message)
 
+class TruncatedUploadError(UserError):
+    def __init__(self, response, message):
+        super(TruncatedUploadError, self).__init__(response, message)
+
 class QuotaExceededError(UnauthorizedError):
     def __init__(self, response, message):
         super(QuotaExceededError, self).__init__(response, message)
@@ -49,6 +53,10 @@ def error(response, message):
         if response.status_code == 401:
             if response.scerror.code == "401-005":
                 return QuotaExceededError(response, message)
+        if response.status_code == 400:
+            if response.scerror.code == "400-038":
+                return TruncatedUploadError(response, message)
+
     if response.status_code == 401:
         return UnauthorizedError(response, message)
 
