@@ -23,3 +23,8 @@ def created():
     response = Mock()
     response.status_code = 201
     return response
+
+def mockCallArg(call, i, name):
+    if len(call[1]) > i:
+        return call[1][i]
+    return call[2][name]

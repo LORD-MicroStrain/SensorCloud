@@ -520,7 +520,10 @@ class Channel(object):
 
             return timeseries.descriptor(partition['sample_rate']), partition
 
-        response = self.url("/streams/timeseries/partitions/").param("version", "1").get()
+        response = self.url("/streams/timeseries/partitions/") \
+            .param("version", "1") \
+            .accept("application/xdr") \
+            .get()
         if response.status_code != httplib.OK:
             raise error(response, "get timeseries partitions")
 
@@ -553,7 +556,10 @@ class Channel(object):
             partition['bin_size'] = unpacker.unpack_float()
             return histogram.descriptor(partition['sample_rate'], partition['bin_start'], partition['bin_size'], partition['num_bins']), partition
 
-        response = self.url("/streams/histogram/partitions/").param("version", "1").get()
+        response = self.url("/streams/histogram/partitions/") \
+            .param("version", "1") \
+            .accept("application/xdr") \
+            .get()
         if response.status_code != httplib.OK:
             raise error(response, "get histogram partitions")
 

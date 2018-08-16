@@ -191,6 +191,14 @@ class TestUpload(unittest.TestCase):
         channel = sensor.channel("channel")
         self.assertEqual(channel.last_timestamp_nanoseconds, 0)
 
+        self.assertEqual(len(request.mock_calls), 3)
+        self.assertTrue(mockCallArg(request.mock_calls[1], 1, "url").endswith("/partitions/"))
+        self.assertTrue(mockCallArg(request.mock_calls[2], 1, "url").endswith("/partitions/"))
+        self.assertTrue("Accept" in mockCallArg(request.mock_calls[1], 2, "options").headers and 
+                mockCallArg(request.mock_calls[1], 2, "options").headers["Accept"] == "application/xdr")
+        self.assertTrue("Accept" in mockCallArg(request.mock_calls[2], 2, "options").headers and 
+                mockCallArg(request.mock_calls[2], 2, "options").headers["Accept"] == "application/xdr")
+
     def test_lastTimestampUsesLatest(self):
         packer = xdrlib.Packer()
         packer.pack_int(1)
@@ -397,7 +405,6 @@ class TestUpload(unittest.TestCase):
         channel.timeseries_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Point(12345, 10.5)])
         channel.histogram_append(sensorcloud.SampleRate.hertz(10), [sensorcloud.Histogram(123455, 0.0, 1.0, [10.5, 4328.3])])
 
-        
         self.assertEqual(channel._cache.timeseries_partition(sensorcloud.SampleRate.hertz(10)).last_timestamp, 12345)
         self.assertEqual(channel._cache.histogram_partition(sensorcloud.SampleRate.hertz(10), 0.0, 1.0, 2).last_timestamp, 123455)
         os.unlink(path)
