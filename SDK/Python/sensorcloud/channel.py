@@ -114,6 +114,21 @@ class Channel(object):
         """
         return max((self.last_timeseries_timestamp(), self.last_histogram_timestamp()))
 
+    @property
+    def first_timestamp_nanoseconds(self):
+        """
+        get the timestamp for the first point stored for this channel as the number of nanoseconds since 1970
+        """
+        first_timeseries = self.first_timeseries_timestamp()
+        first_histogram = self.first_histogram_timestamp()
+        if first_timeseries is None and first_histogram is None:
+            return None
+        if first_timeseries is None:
+            return first_histogram
+        if first_histogram is None:
+            return first_timeseries
+        return min((first_timeseries, first_histogram))
+
     def last_timeseries_timestamp(self, sample_rate = None):
         """
         Get the timestamp for the last point stored for this channel with the given sample rate in nanoseconds since 1970
@@ -127,6 +142,20 @@ class Channel(object):
         if parts:
             return max([p['end_time'] for p in parts])
         return 0
+
+    def first_timeseries_timestamp(self, sample_rate = None):
+        """
+        Get the timestamp for the first point stored for this channel with the given sample rate in nanoseconds since 1970
+        """
+        def filter_fn(partition):
+            if sample_rate:
+                return sample_rate == partition['sample_rate']
+            return True
+
+        parts = filter(filter_fn, self._get_timeseries_partitions().values())
+        if parts:
+            return min([p['start_time'] for p in parts])
+        return None
 
     def last_histogram_timestamp(self, sample_rate = None, bin_start = None, bin_size = None, num_bins = None):
         """
@@ -145,6 +174,24 @@ class Channel(object):
         if parts:
             return max([p['end_time'] for p in parts])
         return 0
+
+    def first_histogram_timestamp(self, sample_rate = None, bin_start = None, bin_size = None, num_bins = None):
+        """
+        Get the timestamp for the first histogram stored for this channel with the given sample rate and histogram parameters in nanoseconds since 1970
+        """
+        def compare_floats(a, b):
+            return ("%6e" % a) == ("%6e" % b)
+
+        def filter_fn(partition):
+            ret = sample_rate == partition['sample_rate'] if sample_rate is not None else True
+            ret = ret and (compare_floats(bin_start, partition['bin_start']) if bin_start is not None else True)
+            ret = ret and (compare_floats(bin_size, partition['bin_size']) if bin_size is not None else True)
+            return ret and (num_bins == partition['num_bins'] if num_bins is not None else True)
+
+        parts = filter(filter_fn, self._get_histogram_partitions().values())
+        if parts:
+            return min([p['start_time'] for p in parts])
+        return None
 
     def url(self, url_path):
         """
