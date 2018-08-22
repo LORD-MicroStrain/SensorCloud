@@ -49,6 +49,16 @@ class Requests(object):
         def requestBody(self):
             return self._requestBody
 
+        @requestBody.setter
+        def requestBody(self, body):
+            if Requests.compression == "gzip":
+                compressedBody = zlib.compress(body)
+                if len(compressedBody) < len(body):
+                    self.addHeader('content-encoding', "gzip")
+                    self._requestBody = compressedBody
+                else:
+                    self._requestBody = body
+
         def addParam(self , name, value):
             """
             Add a query string param to the request options
@@ -66,9 +76,7 @@ class Requests(object):
             """
             Adds data that is sent as the body of a request
             """
-            self._requestBody = requestBody
-
-
+            self.requestBody = requestBody
 
     class RequestBuilder(object):
         """
@@ -225,12 +233,6 @@ class Requests(object):
             self._response_data = None;
             self._response_headers = None;
             self._duration = None
-
-            if self._options.requestBody and Requests.compression == "gzip":
-                compressedBody = zlib.compress(self._options.requestBody)
-                if len(compressedBody) < len(self._options.requestBody):
-                    self._options.setRequestBody(compressedBody)
-                    self._options.addHeader('content-encoding', "gzip")
 
             self.doRequest()
             log.debug("%s: %s %s s:%0.2f", self._method, self._url, self.status_code, self._duration)
