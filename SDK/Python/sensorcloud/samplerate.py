@@ -28,6 +28,14 @@ class SampleRate(object):
     def __str__(self):
         return "%d %s"%(self._rate, SAMPLERATE_NAMES[self._rate_type])
 
+    def __eq__(self, other):
+        if isinstance(other, SampleRate):
+            return self._rate_type == other._rate_type and self._rate == other._rate
+        return NotImplemented
+
+    def __ne__(self, other):
+        return not self == other
+
     @property
     def interval(self):
         if self._rate_type == HERTZ:

@@ -51,7 +51,7 @@ class SensorCloudRequests:
 
         self._cache = cache
 
-    def authenticate(self):
+    def authenticate(self, os_version=None, local_ip=None):
         from sensorcloud import UserAgent
 
         #determine protocol from the auth server
@@ -62,8 +62,10 @@ class SensorCloudRequests:
 
         url = self._authServer + "/SensorCloud/devices/" + self._deviceId + "/authenticate/"
 
-        request = self._requests.url(url)\
-                      .param("version", "1")\
+        request = self._requests.url(url)
+        if os_version: request.param("os_version", os_version)
+        if local_ip: request.param("local_ip", local_ip)
+        request = request.param("version", "1")\
                       .param("key", self._deviceKey)\
                       .accept("application/xdr")\
                       .header("User-Agent", UserAgent)\
