@@ -34,43 +34,51 @@ class ChannelCache(object):
         return self._name
 
     @property
-    def partitions(self):
-        return [Partition(self._cache, descriptor, attributes) for descriptor, attributes in self._partitions.items()]
+    def timeseries_partitions(self):
+        return [Partition(self._cache, descriptor, attributes) for descriptor, attributes in self._timeseries_partitions.items()]
+
+    @property
+    def histogram_partitions(self):
+        return [Partition(self._cache, descriptor, attributes) for descriptor, attributes in self._histogram_partitions.items()]
 
     def timeseries_partition(self, sample_rate):
         descriptor = str(sample_rate)
-        return self._partition(descriptor)
+        if descriptor not in self._timeseries_partitions:
+            self._timeseries_partitions[descriptor] = {}
+        return Partition(self._cache, descriptor, self._timeseries_partitions[descriptor])
 
     def delete_timeseries_partition(self, sample_rate):
         descriptor = str(sample_rate)
         try:
-            del self._partitions[descriptor]
+            del self._timeseries_partitions[descriptor]
         except KeyError:
             pass
 
     def histogram_partition(self, sample_rate, bin_start, bin_size, num_bins):
         descriptor = "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
-        return self._partition(descriptor)
+        if descriptor not in self._histogram_partitions:
+            self._histogram_partitions[descriptor] = {}
+        return Partition(self._cache, descriptor, self._histogram_partitions[descriptor])
 
     def delete_histogram_partition(self, sample_rate, bin_start, bin_size, num_bins):
         descriptor = "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
         try:
-            del self._partitions[descriptor]
+            del self._histogram_partitions[descriptor]
         except KeyError:
             pass
 
     def save(self):
         self._cache.save()
 
-    def __init__(self, cache, name, partitions):
+    def __init__(self, cache, name, attributes):
         self._cache = cache
         self._name = name
-        self._partitions = partitions
-
-    def _partition(self, descriptor):
-        if descriptor not in self._partitions:
-            self._partitions[descriptor] = {}
-        return Partition(self._cache, descriptor, self._partitions[descriptor])
+        if "timeseries_partitions" not in attributes:
+            attributes["timeseries_partitions"] = {}
+        self._timeseries_partitions = attributes["timeseries_partitions"]
+        if "histogram_partitions" not in attributes:
+            attributes["histogram_partitions"] = {}
+        self._histogram_partitions = attributes["histogram_partitions"]
 
 class SensorCache(object):
 

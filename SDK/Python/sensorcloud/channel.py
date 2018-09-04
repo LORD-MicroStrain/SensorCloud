@@ -141,8 +141,8 @@ class Channel(object):
         def filter_cache(partition):
             return str(sample_rate) == partition.descriptor if sample_rate else True
 
-        if self._cache and self._cache.partitions:
-            parts = filter(filter_cache, self._cache.partitions)
+        if self._cache and self._cache.timeseries_partitions:
+            parts = filter(filter_cache, self._cache.timeseries_partitions)
             if parts:
                 return max([p.last_timestamp for p in parts])
             return 0
@@ -182,8 +182,8 @@ class Channel(object):
         def filter_cache(partition):
             return histogram.descriptor_match(partition.descriptor, sample_rate, bin_start, bin_size, num_bins)
 
-        if self._cache and self._cache.partitions:
-            parts = filter(filter_cache, self._cache.partitions)
+        if self._cache and self._cache.histogram_partitions:
+            parts = filter(filter_cache, self._cache.histogram_partitions)
             if parts:
                 return max([p.last_timestamp for p in parts])
             return 0
