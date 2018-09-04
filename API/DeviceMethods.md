@@ -25,18 +25,27 @@ It is also possible to us e a SensorCloud account’s username and password to a
 **Host**:   |sensorcloud.microstrain.com
 **Url**     |```/SensorCloud/devices/<device_id>/authenticate/?version=1&key=<auth_key>```
 **Url(alt)**| ```/SensorCloud/devices/<device_id>/authenticate/?version=1&username=<user>&password=<pwd>```
-**Header**  | * ```Accept: <application/xdr>```
+**Header**  | * ```Accept: <application/xdr>,<application/json>```
 
 ### Response
 * **Success**: 200 OK
 * **Errors**:
  * 401 Invalid Credentials: Username or password is not correct
-* **Content**: XDR
+* **Content**: 
+   * XDR
 ```D
    string auth_token
    string server
    string reserved
 ```
+   * json
+    
+  ```js
+      {
+         server: "server",
+         auth_token: "auth_token"
+      }
+  ```
 
 Get Sensors
 -----------
