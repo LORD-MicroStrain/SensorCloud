@@ -13,6 +13,19 @@ UNIX_EPOCH = datetime(1970, 1, 1)
 def descriptor(sample_rate, bin_start, bin_size, num_bins):
     return "%s_%6e_%6e_%d" % (str(sample_rate), bin_start, bin_size, num_bins)
 
+def descriptor_float(value):
+    return "%6e" % value
+
+def split_descriptor(descriptor):
+    return descriptor.split("_")
+
+def descriptor_match(descriptor, sample_rate = None, bin_start = None, bin_size = None, num_bins = None):
+    d_sample_rate, d_bin_start, d_bin_size, d_num_bins = split_descriptor(descriptor)
+    ret = str(sample_rate) == d_sample_rate if sample_rate is not None else True
+    ret = ret and (descriptor_float(bin_start) == d_bin_start if bin_start is not None else True)
+    ret = ret and (descriptor_float(bin_size) == d_bin_size if bin_size is not None else True)
+    return ret and (str(num_bins) == d_num_bins if num_bins is not None else True)
+
 class Histogram(object):
     """
     Point represents a datapoint as a timestamp and value in a timeseries dataset.

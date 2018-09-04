@@ -138,6 +138,15 @@ class Channel(object):
                 return sample_rate == partition['sample_rate']
             return True
 
+        def filter_cache(partition):
+            return str(sample_rate) == partition.descriptor if sample_rate else True
+
+        if self._cache and self._cache.partitions:
+            parts = filter(filter_cache, self._cache.partitions)
+            if parts:
+                return max([p.last_timestamp for p in parts])
+            return 0
+
         parts = filter(filter_fn, self._get_timeseries_partitions().values())
         if parts:
             return max([p['end_time'] for p in parts])
@@ -169,6 +178,15 @@ class Channel(object):
             ret = ret and (compare_floats(bin_start, partition['bin_start']) if bin_start is not None else True)
             ret = ret and (compare_floats(bin_size, partition['bin_size']) if bin_size is not None else True)
             return ret and (num_bins == partition['num_bins'] if num_bins is not None else True)
+        
+        def filter_cache(partition):
+            return histogram.descriptor_match(partition.descriptor, sample_rate, bin_start, bin_size, num_bins)
+
+        if self._cache and self._cache.partitions:
+            parts = filter(filter_cache, self._cache.partitions)
+            if parts:
+                return max([p.last_timestamp for p in parts])
+            return 0
 
         parts = filter(filter_fn, self._get_histogram_partitions().values())
         if parts:
@@ -187,6 +205,8 @@ class Channel(object):
             ret = ret and (compare_floats(bin_start, partition['bin_start']) if bin_start is not None else True)
             ret = ret and (compare_floats(bin_size, partition['bin_size']) if bin_size is not None else True)
             return ret and (num_bins == partition['num_bins'] if num_bins is not None else True)
+
+        
 
         parts = filter(filter_fn, self._get_histogram_partitions().values())
         if parts:
