@@ -1,5 +1,3 @@
-
-
 import http.client
 import xdrlib
 import time
@@ -26,7 +24,7 @@ def authenticate_key(device_id, key):
     print(response.status, response.reason)
 
     #if response is 200 ok then we can parse the response to get the auth token and server
-    if response.status is http.client.OK: 
+    if response.status == http.client.OK: 
         print("Credential are correct")
             
         #read the body of the response
@@ -56,7 +54,7 @@ def authenticate_alternate(device_id, username, password):
     print(response.status, response.reason)
 
     #if response is 200 ok then we can parse the response to get the auth token and server
-    if response.status is http.client.OK: 
+    if response.status == http.client.OK: 
         print("Credential are correct")
             
         #read the body of the response
@@ -97,7 +95,7 @@ def addSensor(server, auth_token, device_id, sensor_name, sensor_type="", sensor
     print(response.status , response.reason)
 
     #if response is 201 created then we know the sensor was added
-    if response.status is http.client.CREATED: 
+    if response.status == http.client.CREATED: 
         print("Sensor added")
     else:
         print("Error adding sensor. Error:", response.read())
@@ -129,7 +127,7 @@ def addChannel(server, auth_token, device_id, sensor_name, channel_name, channel
     print(response.status , response.reason)
 
     #if response is 201 created then we know the channel was added
-    if response.status is http.client.CREATED: 
+    if response.status == http.client.CREATED: 
         print("Channel successfuly added")
     else:
         print("Error adding channel.  Error:", response.read())
@@ -176,7 +174,7 @@ def uploadSinWave(server, auth_token, device_id, sensor_name, channel_name):
     print(response.status , response.reason)
 
     #if response is 201 created then we know the channel was added
-    if response.status is http.client.CREATED: 
+    if response.status == http.client.CREATED: 
         print("data successfuly added")
     else:
         print("Error adding data.  Error:", response.read())
@@ -194,7 +192,7 @@ def downloadData(server, auth_token, device_id, sensor_name, channel_name, start
     conn.request("GET", url=url, headers=headers)
     response = conn.getresponse()
     data = []
-    if response.status is http.client.OK:
+    if response.status == http.client.OK:
         print("Data retrieved")
         unpacker = xdrlib.Unpacker(response.read())
         while True:
@@ -223,7 +221,7 @@ def GetSensors(server, auth_token, device_id):
     conn.request("GET", url=url, headers=headers)
     sensors = {}
     response = conn.getresponse()
-    if response.status is http.client.OK:
+    if response.status == http.client.OK:
         print("Data Retrieved")
         unpacker = xdrlib.Unpacker(response.read())
         #unpack version, always first
