@@ -154,22 +154,22 @@ Content: XDR
 
 Download Time-Series Data
 -------------------------
-Download a single channel of time-series data in binary format.  This is the most efficient (both time and space) method to download data from SensorCloud.
+Download a single channel of time-series data in binary format.  This is the most efficient (both time and space) method to download data from SensorCloud.  This function will return a maximum of 100k data points.  Requests for a greater number of points should be split into multiple calls to this function.
 
 By default all data-points from all sample rates will be included even if multiple sample rates exist in the time range. 
 
-There are two optional parameters, showSampleRateBoundary and sampleRate, that can be used to customize the download behavior when the stream contains multiple sample-rates.
+There are two optional parameters, showSampleRateBoundary and specificsamplerate, that can be used to customize the download behavior when the stream contains multiple sample-rates.
 
 ***showSampleRateBoundary***: (true|false default=false) - If set to true, each sample rate boundary will be delineated by a timestamp of zero, followed by sample-rate info, and then resume with time-stamped data-points.
 
-***sampleRate***: (example hertz-23, seconds-100) -  When specified, only data points that where uploaded with the specified timestamp are returned.  This does not down-sample data.  It will only download data that had the exact sample-rate specified when uploaded. A listing of all the sample-rates for a channel can be obtained by calling “Get Sample Rate Info”.
+***specificsamplerate***: (example hertz-23, seconds-100) -  When specified, only data points that where uploaded with the specified sample rate are returned.  This does not down-sample data.  It will only download data that had the exact sample-rate specified when uploaded. A listing of all the sample-rates for a channel can be obtained by calling “Get Sample Rate Info”.
 
 ***startTime, endTime***: (example 1388534400000000000) - A Unix timestamp in nanoseconds
 
 ### Request ###
 Method | GET
 -------|----
-Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/streams/ timeseries/data/?version=1&auth_token=<auth_token>&starttime=<startTime>&endtime=<endtime>[&showSampleRateBoundary=<true false>][&samplerate=<samplerate>]```
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/streams/ timeseries/data/?version=1&auth_token=<auth_token>&starttime=<startTime>&endtime=<endtime>[&showSampleRateBoundary=<true false>][&specificsamplerate=<samplerate>]```
 Headers| Accept: application/xdr
 
 ### Response ###

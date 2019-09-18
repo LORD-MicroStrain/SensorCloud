@@ -53,6 +53,9 @@ def error(response, message):
         if response.status_code == 401:
             if response.scerror.code == "401-005":
                 return QuotaExceededError(response, message)
+        if response.status_code == 403:
+            if response.scerror.code == "403-004":
+                return QuotaExceededError(response, message)
         if response.status_code == 400:
             if response.scerror.code == "400-038":
                 return TruncatedUploadError(response, message)
