@@ -7,7 +7,7 @@ The following resources are provided to help communicate with SensorCloud via th
 If you have any questions, please email <support@sensorcloud.com>.
 
 ## API ##
-The documentation for out RESTful Web API can be found [here.](https://github.com/LordMicrostrain/SensorCloud/blob/master/API/README.md)
+The documentation for out RESTful Web API can be found [here.](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/API/README.md)
 
 ## SDKs
 Software Development Kits are provided that can be used to easily communicate with SensorCloud using the Open Data API.
