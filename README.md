@@ -12,22 +12,22 @@ The documentation for out RESTful Web API can be found [here.](https://github.co
 ## SDKs
 Software Development Kits are provided that can be used to easily communicate with SensorCloud using the Open Data API.
 
-**[Java SDK](https://github.com/LordMicrostrain/SensorCloud/tree/master/SDK/Java)**
+**[Java SDK](https://github.com/LORD-MicroStrain/SensorCloud/tree/master/SDK/Java)**
 
-**[C# SDK](https://github.com/LordMicrostrain/SensorCloud/tree/master/SDK/CSharp)**
+**[C# SDK](https://github.com/LORD-MicroStrain/SensorCloud/tree/master/SDK/CSharp)**
 
 ## LabView
 SensorCloud provides VI's which allow your LabVIEW applications to communicate with SensorCloud. They are designed to work for desktop applications and embedded devices like the **NI CompactRIO**. They make it simple to authorize devices, register sensors, and send data from within your LabView code.
 
-Please see the **[LabVIEW SDK wiki](https://github.com/LordMicrostrain/SensorCloud/wiki/LabView-SDK)** for more information.
+Please see the **[LabVIEW SDK wiki](https://github.com/LORD-MicroStrain/SensorCloud/wiki/LabView-SDK)** for more information.
 
 ## Example Code
 Example code is provided that demonstrates using the SDKs for authentication, adding a sensor to a device, and uploading data using the SensorCloud Open Data API. 
 
-**[Python Example Code](https://github.com/LordMicrostrain/SensorCloud/tree/master/Example%20Code/Python)**
+**[Python Example Code](https://github.com/LORD-MicroStrain/SensorCloud/tree/master/Example%20Code/Python)**
 
-**[Java Example Code](https://github.com/LordMicrostrain/SensorCloud/tree/master/Example%20Code/Java)**
+**[Java Example Code](https://github.com/LORD-MicroStrain/SensorCloud/tree/master/Example%20Code/Java)**
 
-**[C# Example Code](https://github.com/LordMicrostrain/SensorCloud/tree/master/Example%20Code/CSharp)**
+**[C# Example Code](https://github.com/LORD-MicroStrain/SensorCloud/tree/master/Example%20Code/CSharp)**
 
 
