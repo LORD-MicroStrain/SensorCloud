@@ -4,7 +4,7 @@ SensorCloud is a unique sensor data storage, visualization and remote management
 
 The following resources are provided to help communicate with SensorCloud via the OpenData API in various programming languages.
 
-If you have any questions, please reach out to us through the [MicroStrain Support Portal](https://support.microstrain.com).
+If you have any questions or run into any issues, please let us know! [MicroStrain Support Portal](https://support.microstrain.com)
 
 ## API ##
 The documentation for out RESTful Web API can be found [here.](https://github.com/LORD-MicroStrain/SensorCloud/blob/master/API/README.md)
