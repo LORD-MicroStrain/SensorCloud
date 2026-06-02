@@ -41,3 +41,5 @@ class CacheTests(unittest.TestCase):
         cache = sensorcloud.cache.Cache(self.cache_path)
         self.assertEqual(cache.auth_server, "https://my.new.server")
         self.assertEqual(cache.device_id, "my_device2")
+        self.assertEqual(cache.token, None)
+        self.assertEqual(cache.server, None)
