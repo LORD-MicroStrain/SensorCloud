@@ -33,3 +33,11 @@ class CacheTests(unittest.TestCase):
         dev = sensorcloud.Device("my_device2", "some_key", "https://my.new.server", cache_file=self.cache_path)
         self.assertEqual(dev._requests._authToken, None)
         self.assertEqual(dev._requests._apiServer, None)
+
+    def test_cache_saved(self):
+        dev = sensorcloud.Device("my_device2", "some_key", "https://my.new.server", cache_file=self.cache_path)
+        dev.save_cache()
+
+        cache = sensorcloud.cache.Cache(self.cache_path)
+        self.assertEqual(cache.auth_server, "https://my.new.server")
+        self.assertEqual(cache.device_id, "my_device2")
