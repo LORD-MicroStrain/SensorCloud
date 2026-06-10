@@ -26,9 +26,14 @@ class Device(object):
         self._requests = SensorCloudRequests(device_id, device_key, auth_server, requests = request_factory, cache = self._cache)
         self._sensors = {}
         if self._cache:
+            if self._cache.auth_server == auth_server and self._cache.device_id == device_id:
+                self._requests._authToken = self._cache.token
+                self._requests._apiServer = self._cache.server
 
-            self._requests._authToken = self._cache.token
-            self._requests._apiServer = self._cache.server
+            else:
+                self._cache.reset()
+                self._cache.auth_server = auth_server
+                self._cache.device_id = device_id
 
             for sensorCache in self._cache.sensors:
                 self._sensors[sensorCache.name] = Sensor(self, sensorCache.name, sensorCache)

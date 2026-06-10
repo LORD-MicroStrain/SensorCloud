@@ -126,6 +126,22 @@ class Cache(object):
         self._data['token'] = value
 
     @property
+    def auth_server(self):
+        return self._data.get('auth_server', None)
+    
+    @auth_server.setter
+    def auth_server(self, value):
+        self._data['auth_server'] = value
+
+    @property
+    def device_id(self):
+        return self._data.get('device_id', None)
+    
+    @device_id.setter
+    def device_id(self, value):
+        self._data['device_id'] = value
+
+    @property
     def sensors(self):
         if 'sensors' not in self._data:
             self._data['sensors'] = {}
@@ -138,6 +154,9 @@ class Cache(object):
             self._data['sensors'][name] = {}
 
         return SensorCache(self, name, self._data['sensors'][name])
+    
+    def reset(self):
+        self._data = {}
 
     def save(self):
         with open(self._path, 'wb') as f:
