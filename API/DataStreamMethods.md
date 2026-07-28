@@ -5,6 +5,7 @@ Data Stream Methods
 * [Get Sample Rate Info](#get-sample-rate-info)
 * [Add Time-Series Data](#add-time-series-data)
 * [Download Time-Series Data](#download-time-series-data)
+* [Download Time-Series Data (Stream)](#download-time-series-data-stream)
 * [Download CSV Data](#download-csv-data)
 * [Download Latest Time-Series Data Point](#download-latest-time-series-data-point)
 * [Get Unit Info](#get-unit-info)
@@ -227,6 +228,34 @@ Headers| Accept: application/xdr
                .
         point||sampleRate data-N;
     ```
+
+Download Time-Series Data (Stream)
+----------------------------------
+Download a single channel of time-series data in binary format as one continuous stream.  Unlike [Download Time-Series Data](#download-time-series-data), this method has no limit on the number of data points returned.  The response is served with HTTP chunked transfer encoding, so data begins arriving immediately and an arbitrarily large time range can be downloaded in a single request.  This is the recommended method for bulk download of large time ranges.
+
+The record format is identical to [Download Time-Series Data](#download-time-series-data), and the ***showSampleRateBoundary*** and ***specificsamplerate*** parameters behave exactly as described there.
+
+***startTime, endTime***: (example 1388534400000000000) - A Unix timestamp in nanoseconds.  A single request may span at most 1 year; split larger ranges into multiple requests.
+
+***calibrated***: (true|false default=false) - If set to true, the channel's stored unit calibration (slope and offset) is applied to each value before it is returned.  By default values are returned raw, exactly as uploaded.
+
+***slope, offset***: (optional floats) - Apply a caller-supplied linear transform (value &times; slope + offset) to every returned value, on top of the stored calibration when combined with calibrated=true.  Sample-rate boundary records are never transformed.
+
+The response body can be compressed over the wire by sending the request header ```Accept-Encoding: gzip```.  When present, the stream is gzip-compressed and the response includes ```Content-Encoding: gzip```.  Compression is recommended for large downloads.
+
+### Request ###
+Method | GET
+-------|----
+Url    | ```/SensorCloud/devices/<device_id>/sensors/<sensor_name>/channels/<channel_name>/streams/ timeseries/data/stream/?version=1&auth_token=<auth_token>&starttime=<startTime>&endtime=<endtime>[&showSampleRateBoundary=<true false>][&specificsamplerate=<samplerate>][&calibrated=<true false>][&slope=<slope>][&offset=<offset>]```
+Headers| Accept: application/xdr<br>Accept-Encoding: gzip (optional)
+
+### Response ###
+* ***Success***: 200 OK (chunked transfer encoding)
+* ***Errors***:
+  * 404 Not Found - A sensor or channel name was used that doesn't exist
+  * 400 Bad Request - starttime or endtime is missing or is not a valid nanosecond timestamp
+  * 400 Bad Request - The requested range exceeds the 1 year maximum for a single download
+* ***Content***: XDR - identical to [Download Time-Series Data](#download-time-series-data): a sequence of packed point records, with sample-rate boundary records interleaved when showSampleRateBoundary is true.
 
 Download CSV Data
 -----------------
